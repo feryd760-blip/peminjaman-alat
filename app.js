@@ -1,8 +1,8 @@
 // ==========================================
 // 1. INISIALISASI SUPABASE
 // ==========================================
-const SUPABASE_URL = 'MASUKKAN_PROJECT_URL_ANDA'; 
-const SUPABASE_KEY = 'MASUKKAN_ANON_KEY_ANDA';
+const SUPABASE_URL = 'https://yoxumvjdfpaecvbtzcnv.supabase.co/rest/v1/'; 
+const SUPABASE_KEY = 'sb_publishable__G9ZZHq3bSgq1EGhTPUTEg_vDjkni64);';
 const supabaseClient = supabase.createClient(https://yoxumvjdfpaecvbtzcnv.supabase.co/rest/v1/, sb_publishable__G9ZZHq3bSgq1EGhTPUTEg_vDjkni64);
 
 // Variabel penampung data sementara
