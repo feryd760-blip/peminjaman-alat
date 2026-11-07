@@ -2,12 +2,26 @@
 // 1. INISIALISASI SUPABASE
 // ==========================================
 const SUPABASE_URL = 'https://yoxumvjdfpaecvbtzcnv.supabase.co'; 
-const SUPABASE_KEY = 'sb_publishable__G9ZZHq3bSgq1EGhTPUTEg_vDjkni64);'
-const supabaseClient = supabase.createClient(https://yoxumvjdfpaecvbtzcnv.supabase.co/rest/v1/, sb_publishable__G9ZZHq3bSgq1EGhTPUTEg_vDjkni64);
+const SUPABASE_KEY = 'sb_publishable_G9ZZHq3bSgq1EGhTPUTBg_vDjknI64'; // Pastikan kutip satu di akhir
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Variabel penampung data sementara
 let dataPeminjaman = [];
 let dataAlat = [];
+
+// ==========================================
+// 2. FUNGSI NAVIGASI (PASTI JALAN)
+// ==========================================
+window.bukaMenu = function(menu, elemen) {
+    document.querySelectorAll('.container-fluid > div').forEach(el => el.classList.add('d-none'));
+    document.getElementById('halaman-' + menu).classList.remove('d-none');
+    
+    const judul = { 'dashboard': 'Dashboard', 'peminjaman': 'Peminjaman Alat', 'alat': 'Data Master Alat' };
+    document.getElementById('judulHalaman').innerText = judul[menu];
+
+    document.querySelectorAll('.sidebar .nav-link').forEach(link => link.classList.remove('active'));
+    elemen.classList.add('active');
+}
 
 // ==========================================
 // 2. FUNGSI AMBIL DATA DARI DATABASE
