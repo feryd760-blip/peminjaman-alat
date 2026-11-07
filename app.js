@@ -1,8 +1,8 @@
 // ==========================================
 // 1. INISIALISASI SUPABASE
 // ==========================================
-const SUPABASE_URL = 'https://yoxumvjdfpaecvbtzcnv.supabase.co/rest/v1/'; 
-const SUPABASE_KEY = 'sb_publishable__G9ZZHq3bSgq1EGhTPUTEg_vDjkni64);';
+const SUPABASE_URL = 'https://yoxumvjdfpaecvbtzcnv.supabase.co'; 
+const SUPABASE_KEY = 'sb_publishable__G9ZZHq3bSgq1EGhTPUTEg_vDjkni64);'
 const supabaseClient = supabase.createClient(https://yoxumvjdfpaecvbtzcnv.supabase.co/rest/v1/, sb_publishable__G9ZZHq3bSgq1EGhTPUTEg_vDjkni64);
 
 // Variabel penampung data sementara
