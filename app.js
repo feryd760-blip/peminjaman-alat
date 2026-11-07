@@ -2,7 +2,7 @@
 // 1. INISIALISASI SUPABASE
 // ==========================================
 const SUPABASE_URL = 'https://yoxumvjdfpaecvbtzcnv.supabase.co'; 
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlveHVtdmpkZnBhZWN2YnR6Y252Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQwNDQ5MzgsImV4cCI6MjEwOTYyMDkzOH0.jtpdBrKmWuwkVVlg_kr_4-7YexSD75xbVD9kCQPFNoc'; // Pastikan kutip satu di akhir
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlveHVtdmpkZnBhZWN2YnR6Y252Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQwNDQ5MzgsImV4cCI6MjEwOTYyMDkzOH0.jtpdBrKmWuwkVVlg_kr_4-7YexSD75xbVD9kCQPFNoc'; 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Variabel penampung data sementara
