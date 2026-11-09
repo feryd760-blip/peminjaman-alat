@@ -10,7 +10,7 @@ let dataPeminjaman = [];
 let dataAlat = [];
 
 // ==========================================
-// 2. FUNGSI NAVIGASI (PASTI JALAN)
+// 2. FUNGSI NAVIGASI
 // ==========================================
 window.bukaMenu = function(menu, elemen) {
     document.querySelectorAll('.container-fluid > div').forEach(el => el.classList.add('d-none'));
@@ -24,56 +24,64 @@ window.bukaMenu = function(menu, elemen) {
 }
 
 // ==========================================
-// 2. FUNGSI AMBIL DATA DARI DATABASE
+// 3. FUNGSI AMBIL DATA DARI DATABASE
 // ==========================================
 async function refreshData() {
-    // Ambil Data Alat
-    const { data: alat, error: errAlat } = await supabaseClient.from('alat').select('*').order('id', { ascending: true });
-    if (!errAlat) dataAlat = alat;
+    if (!supabaseClient) return;
 
-    // Ambil Data Peminjaman
-    const { data: pinjam, error: errPinjam } = await supabaseClient.from('peminjaman').select('*').order('id', { ascending: false });
-    if (!errPinjam) dataPeminjaman = pinjam;
+    try {
+        const { data: alat, error: errAlat } = await supabaseClient.from('alat').select('*').order('id', { ascending: true });
+        if (errAlat) throw errAlat;
+        dataAlat = alat || [];
 
-    // Render ulang semua tabel
-    renderDashboard();
-    renderPeminjaman();
-    renderAlat();
+        const { data: pinjam, error: errPinjam } = await supabaseClient.from('peminjaman').select('*').order('id', { ascending: false });
+        if (errPinjam) throw errPinjam;
+        dataPeminjaman = pinjam || [];
+
+        renderDashboard();
+        renderPeminjaman();
+        renderAlat();
+    } catch (error) {
+        console.error("Gagal mengambil data:", error.message);
+        renderDashboard();
+        renderPeminjaman();
+        renderAlat();
+    }
 }
 
 // ==========================================
-// 3. FUNGSI NAVIGASI
-// ==========================================
-function bukaMenu(menu, elemen) {
-    document.querySelectorAll('.container-fluid > div').forEach(el => el.classList.add('d-none'));
-    document.getElementById('halaman-' + menu).classList.remove('d-none');
-    
-    const judul = { 'dashboard': 'Dashboard', 'peminjaman': 'Peminjaman Alat', 'alat': 'Data Master Alat' };
-    document.getElementById('judulHalaman').innerText = judul[menu];
-
-    document.querySelectorAll('.sidebar .nav-link').forEach(link => link.classList.remove('active'));
-    elemen.classList.add('active');
-}
-
-// ==========================================
-// 4. LOGIKA DASHBOARD
+// 4. LOGIKA DASHBOARD (DENGAN PENCARIAN)
 // ==========================================
 function renderDashboard() {
     const belumKembali = dataPeminjaman.filter(p => p.status === 'Dipinjam').length;
-    document.getElementById('statBelumKembali').innerText = belumKembali;
+    const statBK = document.getElementById('statBelumKembali');
+    if (statBK) statBK.innerText = belumKembali;
 
     const alatRusak = dataAlat.filter(a => a.kondisi === 'Rusak').length;
-    document.getElementById('statAlatRusak').innerText = alatRusak;
+    const statRusak = document.getElementById('statAlatRusak');
+    if (statRusak) statRusak.innerText = alatRusak;
 
     const alatHilang = dataAlat.filter(a => a.kondisi === 'Hilang').length;
-    document.getElementById('statAlatHilang').innerText = alatHilang;
+    const statHilang = document.getElementById('statAlatHilang');
+    if (statHilang) statHilang.innerText = alatHilang;
     
     const tbody = document.getElementById('tabelBelumKembali');
+    if (!tbody) return;
     tbody.innerHTML = '';
-    const dipinjam = dataPeminjaman.filter(p => p.status === 'Dipinjam');
+    
+    // Logika Pencarian
+    const keyword = document.getElementById('searchDashboard') ? document.getElementById('searchDashboard').value.toLowerCase() : '';
+
+    const dipinjam = dataPeminjaman.filter(p => {
+        if (p.status !== 'Dipinjam') return false;
+        
+        return p.nama_peminjam.toLowerCase().includes(keyword) || 
+               p.nama_alat.toLowerCase().includes(keyword) ||
+               p.kode_alat.toLowerCase().includes(keyword);
+    });
     
     if (dipinjam.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-success">Tidak ada alat yang dipinjam.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-success">Tidak ada data yang cocok atau alat sudah kembali.</td></tr>`;
     } else {
         dipinjam.forEach((item, index) => {
             tbody.innerHTML += `
@@ -90,11 +98,17 @@ function renderDashboard() {
     }
 }
 
+// Fungsi khusus untuk memicu render ulang saat mengetik di kolom pencarian
+function cariDashboard() {
+    renderDashboard();
+}
+
 // ==========================================
 // 5. LOGIKA PEMINJAMAN
 // ==========================================
 function renderPeminjaman() {
     const tbody = document.getElementById('tabelPeminjaman');
+    if (!tbody) return;
     tbody.innerHTML = '';
     
     if (dataPeminjaman.length === 0) {
@@ -170,7 +184,6 @@ function bukaModalPinjam() {
     new bootstrap.Modal(document.getElementById('modalPinjam')).show();
 }
 
-// SIMPAN PEMINJAMAN KE SUPABASE
 document.getElementById('formPinjam').addEventListener('submit', async function(e) {
     e.preventDefault();
     const nama = document.getElementById('pinjamNama').value;
@@ -181,7 +194,6 @@ document.getElementById('formPinjam').addEventListener('submit', async function(
     
     const alat = dataAlat.find(a => a.id === alatId);
     
-    // 1. Insert ke tabel peminjaman
     const { error: errPinjam } = await supabaseClient.from('peminjaman').insert([{
         nama_peminjam: nama,
         status_peminjam: statusPeminjam,
@@ -192,11 +204,8 @@ document.getElementById('formPinjam').addEventListener('submit', async function(
         status: 'Dipinjam'
     }]);
     
-    if (errPinjam) {
-        return alert("Gagal meminjam: " + errPinjam.message);
-    }
+    if (errPinjam) return alert("Gagal meminjam: " + errPinjam.message);
 
-    // 2. Update status alat menjadi Dipinjam
     await supabaseClient.from('alat').update({ status: 'Dipinjam' }).eq('id', alatId);
     
     bootstrap.Modal.getInstance(document.getElementById('modalPinjam')).hide();
@@ -220,7 +229,6 @@ function bukaModalKembali(id) {
     new bootstrap.Modal(document.getElementById('modalKembali')).show();
 }
 
-// UPDATE PENGEMBALIAN KE SUPABASE
 document.getElementById('formKembali').addEventListener('submit', async function(e) {
     e.preventDefault();
     const id = parseInt(document.getElementById('kembaliId').value);
@@ -229,7 +237,6 @@ document.getElementById('formKembali').addEventListener('submit', async function
     
     const pinjam = dataPeminjaman.find(p => p.id === id);
     
-    // 1. Update tabel peminjaman (status jadi Kembali)
     const { error: errUpdate } = await supabaseClient.from('peminjaman').update({
         status: 'Kembali',
         tanggal_kembali: today,
@@ -238,12 +245,11 @@ document.getElementById('formKembali').addEventListener('submit', async function
     
     if (errUpdate) return alert("Gagal update peminjaman: " + errUpdate.message);
 
-    // 2. Update master alat (kondisi & statusnya)
     const statusAlatBaru = (kondisiBaru === 'Baik') ? 'Tersedia' : 'Tidak Tersedia';
     const { error: errAlat } = await supabaseClient.from('alat').update({
         kondisi: kondisiBaru,
         status: statusAlatBaru
-    }).eq('kode', pinjam.kode_alat); // Disarankan pakai kode unik agar akurat
+    }).eq('kode', pinjam.kode_alat);
     
     if (errAlat) alert("Gagal update alat: " + errAlat.message);
     
@@ -259,10 +265,11 @@ async function hapusPeminjaman(id) {
 }
 
 // ==========================================
-// 7. LOGIKA DATA ALAT (INSERT & EDIT)
+// 7. LOGIKA DATA ALAT
 // ==========================================
 function renderAlat() {
     const tbody = document.getElementById('tabelAlat');
+    if (!tbody) return;
     tbody.innerHTML = '';
     
     dataAlat.forEach((item, index) => {
@@ -351,5 +358,5 @@ async function hapusAlat(id) {
 // 8. INITIALIZATION
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-    refreshData(); // Ambil data dari Supabase saat aplikasi dibuka
+    refreshData(); 
 });
