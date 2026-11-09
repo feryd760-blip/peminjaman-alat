@@ -49,7 +49,7 @@ async function refreshData() {
 }
 
 // ==========================================
-// 4. LOGIKA DASHBOARD & PENCARIAN
+// 4. LOGIKA DASHBOARD (DENGAN PENCARIAN)
 // ==========================================
 function renderDashboard() {
     const belumKembali = dataPeminjaman.filter(p => p.status === 'Dipinjam').length;
@@ -77,11 +77,12 @@ function renderDashboard() {
         
         return p.nama_peminjam.toLowerCase().includes(keyword) || 
                p.nama_alat.toLowerCase().includes(keyword) ||
-               p.kode_alat.toLowerCase().includes(keyword);
+               p.kode_alat.toLowerCase().includes(keyword) ||
+               (p.alokasi && p.alokasi.toLowerCase().includes(keyword)); // Pencarian juga mencakup alokasi
     });
     
     if (dipinjam.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-success">Tidak ada data yang cocok atau alat sudah kembali.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-success">Tidak ada data yang cocok atau alat sudah kembali.</td></tr>`;
     } else {
         dipinjam.forEach((item, index) => {
             tbody.innerHTML += `
@@ -90,6 +91,7 @@ function renderDashboard() {
                     <td>${item.nama_peminjam}</td>
                     <td><span class="badge bg-secondary">${item.status_peminjam}</span></td>
                     <td><strong>${item.kode_alat}</strong> - ${item.nama_alat}</td>
+                    <td><span class="badge bg-info text-dark">${item.alokasi || '-'}</span></td> <!-- TAMPILKAN ALOKASI -->
                     <td>${item.tanggal}</td>
                     <td><button class="btn btn-sm btn-danger" onclick="bukaModalKembali(${item.id})"><i class="fas fa-undo"></i> Kembalikan</button></td>
                 </tr>
@@ -111,7 +113,7 @@ function renderPeminjaman() {
     tbody.innerHTML = '';
     
     if (dataPeminjaman.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="text-center">Belum ada riwayat.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="10" class="text-center">Belum ada riwayat.</td></tr>`;
         return;
     }
 
@@ -138,6 +140,7 @@ function renderPeminjaman() {
                 <td>${item.nama_peminjam}</td>
                 <td>${displayStatus}</td>
                 <td><strong>${item.kode_alat}</strong> - ${item.nama_alat}</td>
+                <td>${item.alokasi || '-'}</td> <!-- TAMPILKAN ALOKASI -->
                 <td>${item.tanggal}</td>
                 <td>${tglKembali}</td>
                 <td>${displayKondisi}</td>
@@ -189,6 +192,7 @@ document.getElementById('formPinjam').addEventListener('submit', async function(
     const statusPeminjam = document.getElementById('pinjamStatus').value;
     const keterangan = document.getElementById('pinjamKeterangan').value;
     const alatId = parseInt(document.getElementById('pinjamAlat').value);
+    const alokasi = document.getElementById('pinjamAlokasi').value; // <-- AMBIL ALOKASI
     const tanggal = document.getElementById('pinjamTanggal').value;
     
     const alat = dataAlat.find(a => a.id === alatId);
@@ -199,6 +203,7 @@ document.getElementById('formPinjam').addEventListener('submit', async function(
         keterangan: keterangan,
         kode_alat: alat.kode,
         nama_alat: alat.nama,
+        alokasi: alokasi, // <-- SIMPAN KE DATABASE
         tanggal: tanggal,
         status: 'Dipinjam'
     }]);
@@ -306,56 +311,4 @@ document.getElementById('formAlat').addEventListener('submit', async function(e)
     const kondisi = document.getElementById('alatKondisi').value;
     
     const { error } = await supabaseClient.from('alat').insert([{
-        kode: kode, nama: nama, kondisi: kondisi, status: 'Tersedia'
-    }]);
-    
-    if (error) alert("Gagal menambah alat: " + error.message);
-    else {
-        bootstrap.Modal.getInstance(document.getElementById('modalAlat')).hide();
-        refreshData();
-    }
-});
-
-function bukaModalEditAlat(id) {
-    const alat = dataAlat.find(a => a.id === id);
-    if(alat) {
-        document.getElementById('editAlatId').value = alat.id;
-        document.getElementById('editAlatKode').value = alat.kode;
-        document.getElementById('editAlatNama').value = alat.nama;
-        document.getElementById('editAlatKondisi').value = alat.kondisi;
-        document.getElementById('editAlatStatus').value = alat.status;
-        new bootstrap.Modal(document.getElementById('modalEditAlat')).show();
-    }
-}
-
-document.getElementById('formEditAlat').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const id = parseInt(document.getElementById('editAlatId').value);
-    const namaBaru = document.getElementById('editAlatNama').value;
-    const kondisiBaru = document.getElementById('editAlatKondisi').value;
-    const statusBaru = document.getElementById('editAlatStatus').value;
-    
-    const { error } = await supabaseClient.from('alat').update({
-        nama: namaBaru, kondisi: kondisiBaru, status: statusBaru
-    }).eq('id', id);
-    
-    if (error) alert("Gagal update alat: " + error.message);
-    else {
-        bootstrap.Modal.getInstance(document.getElementById('modalEditAlat')).hide();
-        refreshData();
-    }
-});
-
-async function hapusAlat(id) {
-    if(confirm('Hapus alat ini?')) {
-        await supabaseClient.from('alat').delete().eq('id', id);
-        refreshData();
-    }
-}
-
-// ==========================================
-// 8. INITIALIZATION
-// ==========================================
-document.addEventListener('DOMContentLoaded', () => {
-    refreshData(); 
-});
+        kode: kode, nama: nama, kondisi
