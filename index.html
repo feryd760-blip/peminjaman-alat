@@ -4,13 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Peminjaman Alat</title>
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
-    <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2a7d7d">
     <!-- Supabase JS -->
@@ -24,7 +20,6 @@
             <h5><i>ALATKERJA</i></h5>
         </div>
         <div class="admin-profile text-center p-3 border-bottom border-light">
-            <!-- Pastikan file logo.png ada di folder yang sama -->
             <img src="logo.png" class="rounded-circle mb-2 bg-white" alt="Logo Admin" width="70" height="70" style="object-fit: cover; padding: 5px;">
             <h6 class="mb-0">ADMINISTRATOR</h6>
         </div>
@@ -101,6 +96,7 @@
                                         <th>Nama Peminjam</th>
                                         <th>Status Peminjam</th>
                                         <th>Kode & Nama Alat</th>
+                                        <th>Alokasi</th> <!-- KOLOM BARU -->
                                         <th>Tgl Pinjam</th>
                                         <th>Aksi</th>
                                     </tr>
@@ -128,6 +124,7 @@
                                         <th>Nama Peminjam</th>
                                         <th>Status & Ket</th>
                                         <th>Alat</th>
+                                        <th>Alokasi</th>
                                         <th>Tgl Pinjam</th>
                                         <th>Tgl Kembali</th>
                                         <th>Kondisi Kembali</th>
@@ -207,6 +204,16 @@
                     <label>Pilih Alat (Yang Tersedia)</label>
                     <select class="form-select" id="pinjamAlat" required></select>
                 </div>
+                <!-- TAMBAHAN MENU ALOKASI -->
+                <div class="mb-3">
+                    <label>Alokasi Pekerjaan</label>
+                    <select class="form-select" id="pinjamAlokasi" required>
+                        <option value="">-- Pilih Alokasi --</option>
+                        <option value="Fabrikasi">Fabrikasi</option>
+                        <option value="Instalasi">Instalasi</option>
+                    </select>
+                </div>
+                <!-- SAMPAI SINI -->
                 <div class="mb-3">
                     <label>Tanggal Pinjam</label>
                     <input type="date" class="form-control" id="pinjamTanggal" required>
@@ -334,15 +341,5 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="app.js"></script>
-    <!-- Register Service Worker -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(reg => console.log('SW Registered'))
-                    .catch(err => console.log('SW Error', err));
-            });
-        }
-    </script>
 </body>
 </html>
