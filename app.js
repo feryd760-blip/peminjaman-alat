@@ -53,33 +53,48 @@ async function refreshData() {
 // 4. LOGIKA DASHBOARD (DENGAN PENCARIAN)
 // ==========================================
 function renderDashboard() {
-    const belumKembali = dataPeminjaman.filter(p => p.status === 'Dipinjam').length;
-    const statBK = document.getElementById('statBelumKembali');
-    if (statBK) statBK.innerText = belumKembali;
+    // ... (Kode untuk menghitung statistik Belum Kembali, Rusak, Hilang biarkan saja di atas) ...
 
-    const alatRusak = dataAlat.filter(a => a.kondisi === 'Rusak').length;
-    const statRusak = document.getElementById('statAlatRusak');
-    if (statRusak) statRusak.innerText = alatRusak;
-
-    const alatHilang = dataAlat.filter(a => a.kondisi === 'Hilang').length;
-    const statHilang = document.getElementById('statAlatHilang');
-    if (statHilang) statHilang.innerText = alatHilang;
-    
     const tbody = document.getElementById('tabelBelumKembali');
     if (!tbody) return;
     tbody.innerHTML = '';
     
-    // Logika Pencarian
-    const keyword = document.getElementById('searchDashboard') ? document.getElementById('searchDashboard').value.toLowerCase() : '';
+    // --- TAMBAHKAN / PASTIKAN BARIS INI ADA ---
+    const searchInput = document.getElementById('searchDashboard');
+    const keyword = searchInput ? searchInput.value.toLowerCase() : '';
 
     const dipinjam = dataPeminjaman.filter(p => {
         if (p.status !== 'Dipinjam') return false;
         
+        // Filter berdasarkan nama peminjam, nama alat, atau kode alat
         return p.nama_peminjam.toLowerCase().includes(keyword) || 
                p.nama_alat.toLowerCase().includes(keyword) ||
                p.kode_alat.toLowerCase().includes(keyword);
     });
+    // ------------------------------------------
     
+    if (dipinjam.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-success">Tidak ada data yang cocok atau alat sudah kembali.</td></tr>`;
+    } else {
+        dipinjam.forEach((item, index) => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${item.nama_peminjam}</td>
+                    <td><span class="badge bg-secondary">${item.status_peminjam}</span></td>
+                    <td><strong>${item.kode_alat}</strong> - ${item.nama_alat}</td>
+                    <td>${item.tanggal}</td>
+                    <td><button class="btn btn-sm btn-danger" onclick="bukaModalKembali(${item.id})"><i class="fas fa-undo"></i> Kembalikan</button></td>
+                </tr>
+            `;
+        });
+    }
+}
+
+// PASTIKAN FUNGSI INI ADA DI BAWAH FUNGSI renderDashboard
+function cariDashboard() {
+    renderDashboard();
+}    
     if (dipinjam.length === 0) {
         tbody.innerHTML = `<tr><td colspan="6" class="text-center text-success">Tidak ada data yang cocok atau alat sudah kembali.</td></tr>`;
     } else {
