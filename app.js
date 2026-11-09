@@ -4,7 +4,6 @@
 const SUPABASE_URL = 'https://yoxumvjdfpaecvbtzcnv.supabase.co'; 
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlveHVtdmpkZnBhZWN2YnR6Y252Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQwNDQ5MzgsImV4cCI6MjEwOTYyMDkzOH0.jtpdBrKmWuwkVVlg_kr_4-7YexSD75xbVD9kCQPFNoc';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
 let dataPeminjaman = [];
 let dataAlat = [];
 let tabAktif = 'Fabrikasi'; 
@@ -314,4 +313,78 @@ function renderAlat() {
                 <td><strong>${item.kode}</strong></td>
                 <td>${item.nama}</td>
                 <td><span class="badge ${badgeKondisi}">${item.kondisi || 'Baik'}</span></td>
-                <td><
+                <td><span class="badge ${badgeStatus}">${item.status}</span></td>
+                <td>
+                    <button class="btn btn-sm btn-warning text-white me-1" onclick="bukaModalEditAlat(${item.id})"><i class="fas fa-pen"></i></button>
+                    <button class="btn btn-sm btn-danger" onclick="hapusAlat(${item.id})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+function bukaModalAlat() {
+    document.getElementById('formAlat').reset();
+    new bootstrap.Modal(document.getElementById('modalAlat')).show();
+}
+
+document.getElementById('formAlat').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const kode = document.getElementById('alatKode').value;
+    const nama = document.getElementById('alatNama').value;
+    const kondisi = document.getElementById('alatKondisi').value;
+    
+    const { error } = await supabaseClient.from('alat').insert([{
+        kode: kode, nama: nama, kondisi: kondisi, status: 'Tersedia'
+    }]);
+    
+    if (error) alert("Gagal menambah alat: " + error.message);
+    else {
+        bootstrap.Modal.getInstance(document.getElementById('modalAlat')).hide();
+        refreshData();
+    }
+});
+
+function bukaModalEditAlat(id) {
+    const alat = dataAlat.find(a => a.id === id);
+    if(alat) {
+        document.getElementById('editAlatId').value = alat.id;
+        document.getElementById('editAlatKode').value = alat.kode;
+        document.getElementById('editAlatNama').value = alat.nama;
+        document.getElementById('editAlatKondisi').value = alat.kondisi;
+        document.getElementById('editAlatStatus').value = alat.status;
+        new bootstrap.Modal(document.getElementById('modalEditAlat')).show();
+    }
+}
+
+document.getElementById('formEditAlat').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const id = parseInt(document.getElementById('editAlatId').value);
+    const namaBaru = document.getElementById('editAlatNama').value;
+    const kondisiBaru = document.getElementById('editAlatKondisi').value;
+    const statusBaru = document.getElementById('editAlatStatus').value;
+    
+    const { error } = await supabaseClient.from('alat').update({
+        nama: namaBaru, kondisi: kondisiBaru, status: statusBaru
+    }).eq('id', id);
+    
+    if (error) alert("Gagal update alat: " + error.message);
+    else {
+        bootstrap.Modal.getInstance(document.getElementById('modalEditAlat')).hide();
+        refreshData();
+    }
+});
+
+async function hapusAlat(id) {
+    if(confirm('Hapus alat ini?')) {
+        await supabaseClient.from('alat').delete().eq('id', id);
+        refreshData();
+    }
+}
+
+// ==========================================
+// 8. INITIALIZATION
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    refreshData(); 
+});
