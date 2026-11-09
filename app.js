@@ -284,3 +284,108 @@ document.getElementById('formKembali').addEventListener('submit', async function
     
     bootstrap.Modal.getInstance(document.getElementById('modalKembali')).hide();
     refreshData();
+});
+
+async function hapusPeminjaman(id) {
+    if(confirm('Hapus riwayat ini?')) {
+        await supabaseClient.from('peminjaman').delete().eq('id', id);
+        refreshData();
+    }
+}
+
+// ==========================================
+// 7. LOGIKA DATA ALAT
+// ==========================================
+function renderAlat() {
+    const tbody = document.getElementById('tabelAlat');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    
+    dataAlat.forEach((item, index) => {
+        let badgeStatus = item.status === 'Tersedia' ? 'bg-success' : 'bg-danger';
+        
+        let badgeKondisi = 'bg-success'; 
+        if(item.kondisi === 'Rusak') badgeKondisi = 'bg-warning text-dark';
+        if(item.kondisi === 'Hilang') badgeKondisi = 'bg-danger';
+
+        tbody.innerHTML += `
+            <tr>
+                <td>${index + 1}</td>
+                <td><strong>${item.kode}</strong></td>
+                <td>${item.nama}</td>
+                <td><span class="badge ${badgeKondisi}">${item.kondisi || 'Baik'}</span></td>
+                <td><span class="badge ${badgeStatus}">${item.status}</span></td>
+                <td>
+                    <button class="btn btn-sm btn-warning text-white me-1" onclick="bukaModalEditAlat(${item.id})"><i class="fas fa-pen"></i></button>
+                    <button class="btn btn-sm btn-danger" onclick="hapusAlat(${item.id})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+function bukaModalAlat() {
+    document.getElementById('formAlat').reset();
+    new bootstrap.Modal(document.getElementById('modalAlat')).show();
+}
+
+document.getElementById('formAlat').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const kode = document.getElementById('alatKode').value;
+    const nama = document.getElementById('alatNama').value;
+    const kondisi = document.getElementById('alatKondisi').value;
+    
+    const { error } = await supabaseClient.from('alat').insert([{
+        kode: kode, nama: nama, kondisi: kondisi, status: 'Tersedia'
+    }]);
+    
+    if (error) alert("Gagal menambah alat: " + error.message);
+    else {
+        bootstrap.Modal.getInstance(document.getElementById('modalAlat')).hide();
+        refreshData();
+    }
+});
+
+function bukaModalEditAlat(id) {
+    const alat = dataAlat.find(a => a.id === id);
+    if(alat) {
+        document.getElementById('editAlatId').value = alat.id;
+        document.getElementById('editAlatKode').value = alat.kode;
+        document.getElementById('editAlatNama').value = alat.nama;
+        document.getElementById('editAlatKondisi').value = alat.kondisi;
+        document.getElementById('editAlatStatus').value = alat.status;
+        new bootstrap.Modal(document.getElementById('modalEditAlat')).show();
+    }
+}
+
+document.getElementById('formEditAlat').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const id = parseInt(document.getElementById('editAlatId').value);
+    const namaBaru = document.getElementById('editAlatNama').value;
+    const kondisiBaru = document.getElementById('editAlatKondisi').value;
+    const statusBaru = document.getElementById('editAlatStatus').value;
+    
+    const { error } = await supabaseClient.from('alat').update({
+        nama: namaBaru, kondisi: kondisiBaru, status: statusBaru
+    }).eq('id', id);
+    
+    if (error) alert("Gagal update alat: " + error.message);
+    else {
+        bootstrap.Modal.getInstance(document.getElementById('modalEditAlat')).hide();
+        refreshData();
+    }
+});
+
+async function hapusAlat(id) {
+    if(confirm('Hapus alat ini?')) {
+        await supabaseClient.from('alat').delete().eq('id', id);
+        refreshData();
+    }
+}
+
+// ==========================================
+// 8. INITIALIZATION
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    refreshData(); 
+});
