@@ -7,6 +7,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let dataPeminjaman = [];
 let dataAlat = [];
+let tabAktif = 'Fabrikasi'; 
 
 // ==========================================
 // 2. FUNGSI NAVIGASI
@@ -49,7 +50,7 @@ async function refreshData() {
 }
 
 // ==========================================
-// 4. LOGIKA DASHBOARD (DENGAN PENCARIAN)
+// 4. LOGIKA DASHBOARD & TAB
 // ==========================================
 function renderDashboard() {
     const belumKembali = dataPeminjaman.filter(p => p.status === 'Dipinjam').length;
@@ -64,44 +65,68 @@ function renderDashboard() {
     const statHilang = document.getElementById('statAlatHilang');
     if (statHilang) statHilang.innerText = alatHilang;
     
-    const tbody = document.getElementById('tabelBelumKembali');
-    if (!tbody) return;
-    tbody.innerHTML = '';
-    
-    // Logika Pencarian
     const searchInput = document.getElementById('searchDashboard');
     const keyword = searchInput ? searchInput.value.toLowerCase() : '';
 
-    const dipinjam = dataPeminjaman.filter(p => {
+    const dipinjamCocok = dataPeminjaman.filter(p => {
         if (p.status !== 'Dipinjam') return false;
-        
         return p.nama_peminjam.toLowerCase().includes(keyword) || 
                p.nama_alat.toLowerCase().includes(keyword) ||
-               p.kode_alat.toLowerCase().includes(keyword) ||
-               (p.alokasi && p.alokasi.toLowerCase().includes(keyword)); // Pencarian juga mencakup alokasi
+               p.kode_alat.toLowerCase().includes(keyword);
     });
-    
-    if (dipinjam.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-success">Tidak ada data yang cocok atau alat sudah kembali.</td></tr>`;
-    } else {
-        dipinjam.forEach((item, index) => {
-            tbody.innerHTML += `
-                <tr>
-                    <td>${index + 1}</td>
-                    <td>${item.nama_peminjam}</td>
-                    <td><span class="badge bg-secondary">${item.status_peminjam}</span></td>
-                    <td><strong>${item.kode_alat}</strong> - ${item.nama_alat}</td>
-                    <td><span class="badge bg-info text-dark">${item.alokasi || '-'}</span></td> <!-- TAMPILKAN ALOKASI -->
-                    <td>${item.tanggal}</td>
-                    <td><button class="btn btn-sm btn-danger" onclick="bukaModalKembali(${item.id})"><i class="fas fa-undo"></i> Kembalikan</button></td>
-                </tr>
-            `;
-        });
+
+    const dataFabrikasi = dipinjamCocok.filter(p => p.alokasi === 'Fabrikasi');
+    const dataInstalasi = dipinjamCocok.filter(p => p.alokasi === 'Instalasi');
+
+    const tbodyFab = document.getElementById('tabelFabrikasi');
+    if (tbodyFab) {
+        tbodyFab.innerHTML = '';
+        if (dataFabrikasi.length === 0) {
+            tbodyFab.innerHTML = `<tr><td colspan="6" class="text-center text-success">Tidak ada data Fabrikasi yang belum kembali.</td></tr>`;
+        } else {
+            dataFabrikasi.forEach((item, index) => {
+                tbodyFab.innerHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${item.nama_peminjam}</td>
+                        <td><span class="badge bg-secondary">${item.status_peminjam}</span></td>
+                        <td><strong>${item.kode_alat}</strong> - ${item.nama_alat}</td>
+                        <td>${item.tanggal}</td>
+                        <td><button class="btn btn-sm btn-danger" onclick="bukaModalKembali(${item.id})"><i class="fas fa-undo"></i> Kembalikan</button></td>
+                    </tr>
+                `;
+            });
+        }
+    }
+
+    const tbodyInst = document.getElementById('tabelInstalasi');
+    if (tbodyInst) {
+        tbodyInst.innerHTML = '';
+        if (dataInstalasi.length === 0) {
+            tbodyInst.innerHTML = `<tr><td colspan="6" class="text-center text-success">Tidak ada data Instalasi yang belum kembali.</td></tr>`;
+        } else {
+            dataInstalasi.forEach((item, index) => {
+                tbodyInst.innerHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${item.nama_peminjam}</td>
+                        <td><span class="badge bg-secondary">${item.status_peminjam}</span></td>
+                        <td><strong>${item.kode_alat}</strong> - ${item.nama_alat}</td>
+                        <td>${item.tanggal}</td>
+                        <td><button class="btn btn-sm btn-danger" onclick="bukaModalKembali(${item.id})"><i class="fas fa-undo"></i> Kembalikan</button></td>
+                    </tr>
+                `;
+            });
+        }
     }
 }
 
 function cariDashboard() {
     renderDashboard();
+}
+
+function gantiTab(namaTab) {
+    tabAktif = namaTab;
 }
 
 // ==========================================
@@ -140,7 +165,7 @@ function renderPeminjaman() {
                 <td>${item.nama_peminjam}</td>
                 <td>${displayStatus}</td>
                 <td><strong>${item.kode_alat}</strong> - ${item.nama_alat}</td>
-                <td>${item.alokasi || '-'}</td> <!-- TAMPILKAN ALOKASI -->
+                <td>${item.alokasi || '-'}</td>
                 <td>${item.tanggal}</td>
                 <td>${tglKembali}</td>
                 <td>${displayKondisi}</td>
@@ -192,7 +217,7 @@ document.getElementById('formPinjam').addEventListener('submit', async function(
     const statusPeminjam = document.getElementById('pinjamStatus').value;
     const keterangan = document.getElementById('pinjamKeterangan').value;
     const alatId = parseInt(document.getElementById('pinjamAlat').value);
-    const alokasi = document.getElementById('pinjamAlokasi').value; // <-- AMBIL ALOKASI
+    const alokasi = document.getElementById('pinjamAlokasi').value;
     const tanggal = document.getElementById('pinjamTanggal').value;
     
     const alat = dataAlat.find(a => a.id === alatId);
@@ -203,7 +228,7 @@ document.getElementById('formPinjam').addEventListener('submit', async function(
         keterangan: keterangan,
         kode_alat: alat.kode,
         nama_alat: alat.nama,
-        alokasi: alokasi, // <-- SIMPAN KE DATABASE
+        alokasi: alokasi,
         tanggal: tanggal,
         status: 'Dipinjam'
     }]);
@@ -259,108 +284,3 @@ document.getElementById('formKembali').addEventListener('submit', async function
     
     bootstrap.Modal.getInstance(document.getElementById('modalKembali')).hide();
     refreshData();
-});
-
-async function hapusPeminjaman(id) {
-    if(confirm('Hapus riwayat ini?')) {
-        await supabaseClient.from('peminjaman').delete().eq('id', id);
-        refreshData();
-    }
-}
-
-// ==========================================
-// 7. LOGIKA DATA ALAT
-// ==========================================
-function renderAlat() {
-    const tbody = document.getElementById('tabelAlat');
-    if (!tbody) return;
-    tbody.innerHTML = '';
-    
-    dataAlat.forEach((item, index) => {
-        let badgeStatus = item.status === 'Tersedia' ? 'bg-success' : 'bg-danger';
-        
-        let badgeKondisi = 'bg-success'; 
-        if(item.kondisi === 'Rusak') badgeKondisi = 'bg-warning text-dark';
-        if(item.kondisi === 'Hilang') badgeKondisi = 'bg-danger';
-
-        tbody.innerHTML += `
-            <tr>
-                <td>${index + 1}</td>
-                <td><strong>${item.kode}</strong></td>
-                <td>${item.nama}</td>
-                <td><span class="badge ${badgeKondisi}">${item.kondisi || 'Baik'}</span></td>
-                <td><span class="badge ${badgeStatus}">${item.status}</span></td>
-                <td>
-                    <button class="btn btn-sm btn-warning text-white me-1" onclick="bukaModalEditAlat(${item.id})"><i class="fas fa-pen"></i></button>
-                    <button class="btn btn-sm btn-danger" onclick="hapusAlat(${item.id})"><i class="fas fa-trash"></i></button>
-                </td>
-            </tr>
-        `;
-    });
-}
-
-function bukaModalAlat() {
-    document.getElementById('formAlat').reset();
-    new bootstrap.Modal(document.getElementById('modalAlat')).show();
-}
-
-document.getElementById('formAlat').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const kode = document.getElementById('alatKode').value;
-    const nama = document.getElementById('alatNama').value;
-    const kondisi = document.getElementById('alatKondisi').value;
-    
-    const { error } = await supabaseClient.from('alat').insert([{
-        kode: kode, nama: nama, kondisi: kondisi, status: 'Tersedia'
-    }]);
-    
-    if (error) alert("Gagal menambah alat: " + error.message);
-    else {
-        bootstrap.Modal.getInstance(document.getElementById('modalAlat')).hide();
-        refreshData();
-    }
-});
-
-function bukaModalEditAlat(id) {
-    const alat = dataAlat.find(a => a.id === id);
-    if(alat) {
-        document.getElementById('editAlatId').value = alat.id;
-        document.getElementById('editAlatKode').value = alat.kode;
-        document.getElementById('editAlatNama').value = alat.nama;
-        document.getElementById('editAlatKondisi').value = alat.kondisi;
-        document.getElementById('editAlatStatus').value = alat.status;
-        new bootstrap.Modal(document.getElementById('modalEditAlat')).show();
-    }
-}
-
-document.getElementById('formEditAlat').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const id = parseInt(document.getElementById('editAlatId').value);
-    const namaBaru = document.getElementById('editAlatNama').value;
-    const kondisiBaru = document.getElementById('editAlatKondisi').value;
-    const statusBaru = document.getElementById('editAlatStatus').value;
-    
-    const { error } = await supabaseClient.from('alat').update({
-        nama: namaBaru, kondisi: kondisiBaru, status: statusBaru
-    }).eq('id', id);
-    
-    if (error) alert("Gagal update alat: " + error.message);
-    else {
-        bootstrap.Modal.getInstance(document.getElementById('modalEditAlat')).hide();
-        refreshData();
-    }
-});
-
-async function hapusAlat(id) {
-    if(confirm('Hapus alat ini?')) {
-        await supabaseClient.from('alat').delete().eq('id', id);
-        refreshData();
-    }
-}
-
-// ==========================================
-// 8. INITIALIZATION
-// ==========================================
-document.addEventListener('DOMContentLoaded', () => {
-    refreshData(); 
-});
