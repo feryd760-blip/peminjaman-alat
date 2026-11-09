@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2a7d7d">
-    <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -21,7 +20,7 @@
         </div>
         <div class="admin-profile text-center p-3 border-bottom border-light">
             <img src="logo.png" class="rounded-circle mb-2 bg-white" alt="Logo Admin" width="70" height="70" style="object-fit: cover; padding: 5px;">
-            <h6 class="mb-0">CENTRAL WORKSHOP</h6>
+            <h6 class="mb-0">ADMINISTRATOR</h6>
         </div>
         <ul class="nav flex-column mt-2">
             <li class="nav-item">
@@ -48,6 +47,7 @@
             
             <!-- 1. HALAMAN DASHBOARD -->
             <div id="halaman-dashboard">
+                <!-- KOTAK STATISTIK -->
                 <div class="row mb-4">
                     <div class="col-md-4">
                         <div class="info-box bg-teal">
@@ -78,31 +78,67 @@
                     </div>
                 </div>
 
+                <!-- TABEL DENGAN TAB -->
                 <div class="card shadow-sm mt-4">
-                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                        <h6 class="mb-0 text-danger"><i class="fas fa-exclamation-circle"></i> Alat Belum Dikembalikan</h6>
-                        <!-- KOLOM PENCARIAN -->
-                        <div class="input-group w-50">
-                            <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
-                            <input type="text" class="form-control" id="searchDashboard" placeholder="Cari nama peminjam atau alat..." onkeyup="cariDashboard()">
+                    <div class="card-header bg-white">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="mb-0 text-danger"><i class="fas fa-exclamation-circle"></i> Alat Belum Dikembalikan</h6>
+                            <div class="input-group w-50">
+                                <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
+                                <input type="text" class="form-control" id="searchDashboard" placeholder="Cari nama peminjam atau alat..." onkeyup="cariDashboard()">
+                            </div>
                         </div>
+                        
+                        <!-- NAVIGASI TAB -->
+                        <ul class="nav nav-tabs" id="myTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="tab-fabrikasi" data-bs-toggle="tab" data-bs-target="#konten-fabrikasi" type="button" role="tab" onclick="gantiTab('Fabrikasi')">Fabrikasi</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="tab-instalasi" data-bs-toggle="tab" data-bs-target="#konten-instalasi" type="button" role="tab" onclick="gantiTab('Instalasi')">Instalasi</button>
+                            </li>
+                        </ul>
                     </div>
+                    
                     <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-hover">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>No</th>
-                                        <th>Nama Peminjam</th>
-                                        <th>Status Peminjam</th>
-                                        <th>Kode & Nama Alat</th>
-                                        <th>Alokasi</th> <!-- KOLOM BARU -->
-                                        <th>Tgl Pinjam</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabelBelumKembali"></tbody>
-                            </table>
+                        <div class="tab-content" id="myTabContent">
+                            <!-- TAB FABRIKASI -->
+                            <div class="tab-pane fade show active" id="konten-fabrikasi" role="tabpanel">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>No</th>
+                                                <th>Nama Peminjam</th>
+                                                <th>Status Peminjam</th>
+                                                <th>Kode & Nama Alat</th>
+                                                <th>Tgl Pinjam</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tabelFabrikasi"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <!-- TAB INSTALASI -->
+                            <div class="tab-pane fade" id="konten-instalasi" role="tabpanel">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>No</th>
+                                                <th>Nama Peminjam</th>
+                                                <th>Status Peminjam</th>
+                                                <th>Kode & Nama Alat</th>
+                                                <th>Tgl Pinjam</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tabelInstalasi"></tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -204,7 +240,7 @@
                     <label>Pilih Alat (Yang Tersedia)</label>
                     <select class="form-select" id="pinjamAlat" required></select>
                 </div>
-                <!-- TAMBAHAN MENU ALOKASI -->
+                <!-- MENU ALOKASI -->
                 <div class="mb-3">
                     <label>Alokasi Pekerjaan</label>
                     <select class="form-select" id="pinjamAlokasi" required>
@@ -213,7 +249,6 @@
                         <option value="Instalasi">Instalasi</option>
                     </select>
                 </div>
-                <!-- SAMPAI SINI -->
                 <div class="mb-3">
                     <label>Tanggal Pinjam</label>
                     <input type="date" class="form-control" id="pinjamTanggal" required>
