@@ -311,4 +311,56 @@ document.getElementById('formAlat').addEventListener('submit', async function(e)
     const kondisi = document.getElementById('alatKondisi').value;
     
     const { error } = await supabaseClient.from('alat').insert([{
-        kode: kode, nama: nama, kondisi
+        kode: kode, nama: nama, kondisi: kondisi, status: 'Tersedia'
+    }]);
+    
+    if (error) alert("Gagal menambah alat: " + error.message);
+    else {
+        bootstrap.Modal.getInstance(document.getElementById('modalAlat')).hide();
+        refreshData();
+    }
+});
+
+function bukaModalEditAlat(id) {
+    const alat = dataAlat.find(a => a.id === id);
+    if(alat) {
+        document.getElementById('editAlatId').value = alat.id;
+        document.getElementById('editAlatKode').value = alat.kode;
+        document.getElementById('editAlatNama').value = alat.nama;
+        document.getElementById('editAlatKondisi').value = alat.kondisi;
+        document.getElementById('editAlatStatus').value = alat.status;
+        new bootstrap.Modal(document.getElementById('modalEditAlat')).show();
+    }
+}
+
+document.getElementById('formEditAlat').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const id = parseInt(document.getElementById('editAlatId').value);
+    const namaBaru = document.getElementById('editAlatNama').value;
+    const kondisiBaru = document.getElementById('editAlatKondisi').value;
+    const statusBaru = document.getElementById('editAlatStatus').value;
+    
+    const { error } = await supabaseClient.from('alat').update({
+        nama: namaBaru, kondisi: kondisiBaru, status: statusBaru
+    }).eq('id', id);
+    
+    if (error) alert("Gagal update alat: " + error.message);
+    else {
+        bootstrap.Modal.getInstance(document.getElementById('modalEditAlat')).hide();
+        refreshData();
+    }
+});
+
+async function hapusAlat(id) {
+    if(confirm('Hapus alat ini?')) {
+        await supabaseClient.from('alat').delete().eq('id', id);
+        refreshData();
+    }
+}
+
+// ==========================================
+// 8. INITIALIZATION
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    refreshData(); 
+});
