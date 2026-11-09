@@ -5,7 +5,6 @@ const SUPABASE_URL = 'https://yoxumvjdfpaecvbtzcnv.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlveHVtdmpkZnBhZWN2YnR6Y252Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQwNDQ5MzgsImV4cCI6MjEwOTYyMDkzOH0.jtpdBrKmWuwkVVlg_kr_4-7YexSD75xbVD9kCQPFNoc';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Variabel penampung data sementara
 let dataPeminjaman = [];
 let dataAlat = [];
 
@@ -50,28 +49,36 @@ async function refreshData() {
 }
 
 // ==========================================
-// 4. LOGIKA DASHBOARD (DENGAN PENCARIAN)
+// 4. LOGIKA DASHBOARD & PENCARIAN
 // ==========================================
 function renderDashboard() {
-    // ... (Kode untuk menghitung statistik Belum Kembali, Rusak, Hilang biarkan saja di atas) ...
+    const belumKembali = dataPeminjaman.filter(p => p.status === 'Dipinjam').length;
+    const statBK = document.getElementById('statBelumKembali');
+    if (statBK) statBK.innerText = belumKembali;
 
+    const alatRusak = dataAlat.filter(a => a.kondisi === 'Rusak').length;
+    const statRusak = document.getElementById('statAlatRusak');
+    if (statRusak) statRusak.innerText = alatRusak;
+
+    const alatHilang = dataAlat.filter(a => a.kondisi === 'Hilang').length;
+    const statHilang = document.getElementById('statAlatHilang');
+    if (statHilang) statHilang.innerText = alatHilang;
+    
     const tbody = document.getElementById('tabelBelumKembali');
     if (!tbody) return;
     tbody.innerHTML = '';
     
-    // --- TAMBAHKAN / PASTIKAN BARIS INI ADA ---
+    // Logika Pencarian
     const searchInput = document.getElementById('searchDashboard');
     const keyword = searchInput ? searchInput.value.toLowerCase() : '';
 
     const dipinjam = dataPeminjaman.filter(p => {
         if (p.status !== 'Dipinjam') return false;
         
-        // Filter berdasarkan nama peminjam, nama alat, atau kode alat
         return p.nama_peminjam.toLowerCase().includes(keyword) || 
                p.nama_alat.toLowerCase().includes(keyword) ||
                p.kode_alat.toLowerCase().includes(keyword);
     });
-    // ------------------------------------------
     
     if (dipinjam.length === 0) {
         tbody.innerHTML = `<tr><td colspan="6" class="text-center text-success">Tidak ada data yang cocok atau alat sudah kembali.</td></tr>`;
@@ -91,29 +98,6 @@ function renderDashboard() {
     }
 }
 
-// PASTIKAN FUNGSI INI ADA DI BAWAH FUNGSI renderDashboard
-function cariDashboard() {
-    renderDashboard();
-}    
-    if (dipinjam.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-success">Tidak ada data yang cocok atau alat sudah kembali.</td></tr>`;
-    } else {
-        dipinjam.forEach((item, index) => {
-            tbody.innerHTML += `
-                <tr>
-                    <td>${index + 1}</td>
-                    <td>${item.nama_peminjam}</td>
-                    <td><span class="badge bg-secondary">${item.status_peminjam}</span></td>
-                    <td><strong>${item.kode_alat}</strong> - ${item.nama_alat}</td>
-                    <td>${item.tanggal}</td>
-                    <td><button class="btn btn-sm btn-danger" onclick="bukaModalKembali(${item.id})"><i class="fas fa-undo"></i> Kembalikan</button></td>
-                </tr>
-            `;
-        });
-    }
-}
-
-// Fungsi khusus untuk memicu render ulang saat mengetik di kolom pencarian
 function cariDashboard() {
     renderDashboard();
 }
