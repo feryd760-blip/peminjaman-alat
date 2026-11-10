@@ -30,17 +30,13 @@ async function refreshData() {
     if (!supabaseClient) return;
 
     try {
-        const { data: pinjam, error: errPinjam } = await supabaseClient.rpc('get_all_peminjaman');
-            .select('id, kode, nama, kondisi, status') 
-            .order('id', { ascending: true });
+        // Ambil Data Alat
+        const { data: alat, error: errAlat } = await supabaseClient.from('alat').select('*');
         if (errAlat) throw errAlat;
         dataAlat = alat || [];
 
-        // KITA SEBUTKAN KOLOMNYA SATU PER SATU DI SINI
-        const { data: pinjam, error: errPinjam } = await supabaseClient.from('peminjaman')
-            .select('id, nama_peminjam, status_peminjam, keterangan, kode_alat, nama_alat, alokasi, ket_instalasi, tanggal, tanggal_kembali, kondisi_kembali, status')
-            .order('id', { ascending: false });
-            
+        // Ambil Data Peminjaman
+        const { data: pinjam, error: errPinjam } = await supabaseClient.from('peminjaman').select('*').order('id', { ascending: false });
         if (errPinjam) throw errPinjam;
         dataPeminjaman = pinjam || [];
 
@@ -50,9 +46,6 @@ async function refreshData() {
     } catch (error) {
         console.error("Gagal mengambil data:", error.message);
         alert("Error Database: " + error.message);
-        renderDashboard();
-        renderPeminjaman();
-        renderAlat();
     }
 }
 
@@ -411,7 +404,7 @@ async function hapusAlat(id) {
 }
 
 // ==========================================
-// 8. FUNGSI DOWNLOAD EXCEL (LAPORAN) - DIPERBAIKI
+// 8. FUNGSI DOWNLOAD EXCEL (LAPORAN)
 // ==========================================
 function downloadExcel() {
     if (dataPeminjaman.length === 0) {
@@ -419,24 +412,19 @@ function downloadExcel() {
         return;
     }
 
-    // PENTING: Menggunakan titik koma (;) sebagai pemisah agar terbaca di Excel/WPS Indonesia
     let csvContent = "No;Nama Peminjam;Status Peminjam;Alokasi;Ket Instalasi;Kode Alat;Nama Alat;Tgl Pinjam;Tgl Kembali;Kondisi Kembali;Status\n";
 
-    // Isi Data
     dataPeminjaman.forEach((item, index) => {
-        // Bersihkan data dari karakter titik koma agar tidak merusak format
         let nama = (item.nama_peminjam || '').replace(/;/g, ' ');
         let ketInstalasi = (item.ket_instalasi || '').replace(/;/g, ' ');
         let alokasi = (item.alokasi || '-').replace(/;/g, ' ');
         
-        // Jika kosong, tampilkan tanda strip (-) agar rapi
         let tglKembali = item.tanggal_kembali ? item.tanggal_kembali : '-';
         let kondisiKembali = item.kondisi_kembali ? item.kondisi_kembali : '-';
 
         csvContent += `${index + 1};${nama};${item.status_peminjam};${alokasi};${ketInstalasi};${item.kode_alat};${item.nama_alat};${item.tanggal};${tglKembali};${kondisiKembali};${item.status}\n`;
     });
 
-    // Membuat file dan memicu download (Tambahkan BOM UTF-8 agar karakter terbaca sempurna)
     const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
