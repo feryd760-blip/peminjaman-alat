@@ -30,11 +30,17 @@ async function refreshData() {
     if (!supabaseClient) return;
 
     try {
-        const { data: alat, error: errAlat } = await supabaseClient.from('alat').select('*').order('id', { ascending: true });
+        // 1. Ambil Data Alat (Hanya kolom yang pasti ada)
+        const { data: alat, error: errAlat } = await supabaseClient.from('alat')
+            .select('id, kode, nama, kondisi, status') 
+            .order('id', { ascending: true });
         if (errAlat) throw errAlat;
         dataAlat = alat || [];
 
-        const { data: pinjam, error: errPinjam } = await supabaseClient.from('peminjaman').select('*').order('id', { ascending: false });
+        // 2. Ambil Data Peminjaman (Sebutkan kolomnya satu per satu)
+        const { data: pinjam, error: errPinjam } = await supabaseClient.from('peminjaman')
+            .select('id, nama_peminjam, status_peminjam, keterangan, kode_alat, nama_alat, alokasi, ket_instalasi, tanggal, tanggal_kembali, kondisi_kembali, status')
+            .order('id', { ascending: false });
         if (errPinjam) throw errPinjam;
         dataPeminjaman = pinjam || [];
 
@@ -43,6 +49,7 @@ async function refreshData() {
         renderAlat();
     } catch (error) {
         console.error("Gagal mengambil data:", error.message);
+        alert("Error Database: " + error.message); // Memunculkan error di layar
         renderDashboard();
         renderPeminjaman();
         renderAlat();
