@@ -4,11 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Peminjaman Alat</title>
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Ikon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
+    <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2a7d7d">
+    <!-- Library Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -32,7 +37,6 @@
             <li class="nav-item">
                 <a class="nav-link" href="#" onclick="bukaMenu('alat', this)"><i class="fas fa-tools me-2"></i> Data Master Alat</a>
             </li>
-            <!-- MENU LAPORAN BARU -->
             <li class="nav-item">
                 <a class="nav-link" href="#" onclick="bukaMenu('laporan', this)"><i class="fas fa-file-excel me-2"></i> Laporan</a>
             </li>
@@ -221,7 +225,7 @@
         </div>
     </div>
 
-    <!-- MODAL PINJAM -->
+    <!-- MODAL PINJAM (Hanya ada satu Alokasi) -->
     <div class="modal fade" id="modalPinjam" tabindex="-1">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -257,6 +261,7 @@
                     <select class="form-select" id="pinjamAlat" required></select>
                 </div>
                 
+                <!-- MENU ALOKASI (HANYA SATU) -->
                 <div class="mb-3">
                     <label>Alokasi Pekerjaan</label>
                     <select class="form-select" id="pinjamAlokasi" required onchange="cekAlokasi()">
@@ -266,21 +271,12 @@
                     </select>
                 </div>
                 
-                <!-- KOLOM KETERANGAN INSTALASI (Tersembunyi default) -->
-                                <div class="mb-3">
-                    <label>Alokasi Pekerjaan</label>
-                    <select class="form-select" id="pinjamAlokasi" required onchange="cekAlokasi()">
-                        <option value="">-- Pilih Alokasi --</option>
-                        <option value="Fabrikasi">Fabrikasi</option>
-                        <option value="Instalasi">Instalasi</option>
-                    </select>
-                </div>
-                
-                <!-- KOLOM KETERANGAN INSTALASI -->
+                <!-- KETERANGAN INSTALASI -->
                 <div class="mb-3 d-none" id="divKetInstalasi">
                     <label>Keterangan Instalasi</label>
                     <input type="text" class="form-control" id="pinjamKetInstalasi" placeholder="Contoh: Instalasi Panel Lantai 2">
                 </div>
+
                 <div class="mb-3">
                     <label>Tanggal Pinjam</label>
                     <input type="date" class="form-control" id="pinjamTanggal" required>
@@ -406,6 +402,7 @@
       </div>
     </div>
 
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="app.js"></script>
 </body>
