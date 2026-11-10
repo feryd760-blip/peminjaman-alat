@@ -30,7 +30,7 @@ async function refreshData() {
     if (!supabaseClient) return;
 
     try {
-        const { data: alat, error: errAlat } = await supabaseClient.from('alat')
+        const { data: pinjam, error: errPinjam } = await supabaseClient.rpc('get_all_peminjaman');
             .select('id, kode, nama, kondisi, status') 
             .order('id', { ascending: true });
         if (errAlat) throw errAlat;
