@@ -10,13 +10,24 @@ let dataAlat = [];
 let tabAktif = 'Fabrikasi'; 
 
 // ==========================================
+// 1. INISIALISASI SUPABASE
+// ==========================================
+const SUPABASE_URL = 'MASUKKAN_PROJECT_URL_ANDA'; 
+const SUPABASE_KEY = 'MASUKKAN_ANON_KEY_ANDA';
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let dataPeminjaman = [];
+let dataAlat = [];
+let tabAktif = 'Fabrikasi'; 
+
+// ==========================================
 // 2. FUNGSI NAVIGASI
 // ==========================================
 window.bukaMenu = function(menu, elemen) {
     document.querySelectorAll('.container-fluid > div').forEach(el => el.classList.add('d-none'));
     document.getElementById('halaman-' + menu).classList.remove('d-none');
     
-    const judul = { 'dashboard': 'Dashboard', 'peminjaman': 'Peminjaman Alat', 'alat': 'Data Master Alat' };
+    const judul = { 'dashboard': 'Dashboard', 'peminjaman': 'Peminjaman Alat', 'alat': 'Data Master Alat', 'laporan': 'Laporan' };
     document.getElementById('judulHalaman').innerText = judul[menu];
 
     document.querySelectorAll('.sidebar .nav-link').forEach(link => link.classList.remove('active'));
@@ -103,7 +114,7 @@ function renderDashboard() {
     if (tbodyInst) {
         tbodyInst.innerHTML = '';
         if (dataInstalasi.length === 0) {
-            tbodyInst.innerHTML = `<tr><td colspan="6" class="text-center text-success">Tidak ada data Instalasi yang belum kembali.</td></tr>`;
+            tbodyInst.innerHTML = `<tr><td colspan="7" class="text-center text-success">Tidak ada data Instalasi yang belum kembali.</td></tr>`;
         } else {
             dataInstalasi.forEach((item, index) => {
                 tbodyInst.innerHTML += `
@@ -112,6 +123,7 @@ function renderDashboard() {
                         <td>${item.nama_peminjam}</td>
                         <td><span class="badge bg-secondary">${item.status_peminjam}</span></td>
                         <td><strong>${item.kode_alat}</strong> - ${item.nama_alat}</td>
+                        <td>${item.ket_instalasi || '-'}</td>
                         <td>${item.tanggal}</td>
                         <td><button class="btn btn-sm btn-danger" onclick="bukaModalKembali(${item.id})"><i class="fas fa-undo"></i> Kembalikan</button></td>
                     </tr>
@@ -138,7 +150,7 @@ function renderPeminjaman() {
     tbody.innerHTML = '';
     
     if (dataPeminjaman.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="10" class="text-center">Belum ada riwayat.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="11" class="text-center">Belum ada riwayat.</td></tr>`;
         return;
     }
 
@@ -166,6 +178,7 @@ function renderPeminjaman() {
                 <td>${displayStatus}</td>
                 <td><strong>${item.kode_alat}</strong> - ${item.nama_alat}</td>
                 <td>${item.alokasi || '-'}</td>
+                <td>${item.ket_instalasi || '-'}</td> <!-- TAMPILKAN KET INSTALASI -->
                 <td>${item.tanggal}</td>
                 <td>${tglKembali}</td>
                 <td>${displayKondisi}</td>
@@ -191,9 +204,26 @@ function cekStatusLainnya() {
     }
 }
 
+// Fungsi untuk memunculkan keterangan jika pilih Instalasi
+function cekAlokasi() {
+    const alokasi = document.getElementById('pinjamAlokasi').value;
+    const divKetInstalasi = document.getElementById('divKetInstalasi');
+    const inputKetInstalasi = document.getElementById('pinjamKetInstalasi');
+
+    if (alokasi === 'Instalasi') {
+        divKetInstalasi.classList.remove('d-none');
+        inputKetInstalasi.required = true;
+    } else {
+        divKetInstalasi.classList.add('d-none');
+        inputKetInstalasi.required = false;
+        inputKetInstalasi.value = '';
+    }
+}
+
 function bukaModalPinjam() {
     document.getElementById('formPinjam').reset();
     document.getElementById('divKeterangan').classList.add('d-none'); 
+    document.getElementById('divKetInstalasi').classList.add('d-none'); 
     
     const select = document.getElementById('pinjamAlat');
     select.innerHTML = '<option value="">-- Pilih Alat --</option>';
@@ -218,6 +248,7 @@ document.getElementById('formPinjam').addEventListener('submit', async function(
     const keterangan = document.getElementById('pinjamKeterangan').value;
     const alatId = parseInt(document.getElementById('pinjamAlat').value);
     const alokasi = document.getElementById('pinjamAlokasi').value;
+    const ketInstalasi = document.getElementById('pinjamKetInstalasi').value;
     const tanggal = document.getElementById('pinjamTanggal').value;
     
     const alat = dataAlat.find(a => a.id === alatId);
@@ -229,6 +260,7 @@ document.getElementById('formPinjam').addEventListener('submit', async function(
         kode_alat: alat.kode,
         nama_alat: alat.nama,
         alokasi: alokasi,
+        ket_instalasi: ketInstalasi,
         tanggal: tanggal,
         status: 'Dipinjam'
     }]);
@@ -384,7 +416,40 @@ async function hapusAlat(id) {
 }
 
 // ==========================================
-// 8. INITIALIZATION
+// 8. FUNGSI DOWNLOAD EXCEL (LAPORAN)
+// ==========================================
+function downloadExcel() {
+    if (dataPeminjaman.length === 0) {
+        alert("Belum ada data untuk diunduh!");
+        return;
+    }
+
+    // Header CSV
+    let csvContent = "No,Nama Peminjam,Status Peminjam,Alokasi,Ket Instalasi,Kode Alat,Nama Alat,Tgl Pinjam,Tgl Kembali,Kondisi Kembali,Status\n";
+
+    // Isi Data
+    dataPeminjaman.forEach((item, index) => {
+        let nama = item.nama_peminjam.replace(/,/g, ' ');
+        let ket = (item.keterangan || '').replace(/,/g, ' ');
+        let ketInstalasi = (item.ket_instalasi || '').replace(/,/g, ' ');
+        
+        csvContent += `${index + 1},${nama},${item.status_peminjam},${item.alokasi || '-'},${ketInstalasi},${item.kode_alat},${item.nama_alat},${item.tanggal},${item.tanggal_kembali || '-'},${item.kondisi_kembali || '-'},${item.status}\n`;
+    });
+
+    // Membuat file dan memicu download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Laporan_Peminjaman_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// ==========================================
+// 9. INITIALIZATION
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     refreshData(); 
