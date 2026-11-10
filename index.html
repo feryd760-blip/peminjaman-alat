@@ -267,11 +267,20 @@
                 </div>
                 
                 <!-- KOLOM KETERANGAN INSTALASI (Tersembunyi default) -->
+                                <div class="mb-3">
+                    <label>Alokasi Pekerjaan</label>
+                    <select class="form-select" id="pinjamAlokasi" required onchange="cekAlokasi()">
+                        <option value="">-- Pilih Alokasi --</option>
+                        <option value="Fabrikasi">Fabrikasi</option>
+                        <option value="Instalasi">Instalasi</option>
+                    </select>
+                </div>
+                
+                <!-- KOLOM KETERANGAN INSTALASI -->
                 <div class="mb-3 d-none" id="divKetInstalasi">
                     <label>Keterangan Instalasi</label>
                     <input type="text" class="form-control" id="pinjamKetInstalasi" placeholder="Contoh: Instalasi Panel Lantai 2">
                 </div>
-
                 <div class="mb-3">
                     <label>Tanggal Pinjam</label>
                     <input type="date" class="form-control" id="pinjamTanggal" required>
