@@ -404,7 +404,7 @@ async function hapusAlat(id) {
 }
 
 // ==========================================
-// 8. FUNGSI DOWNLOAD EXCEL (LAPORAN)
+// 8. FUNGSI DOWNLOAD EXCEL (LAPORAN) - DIPERBAIKI
 // ==========================================
 function downloadExcel() {
     if (dataPeminjaman.length === 0) {
@@ -412,17 +412,25 @@ function downloadExcel() {
         return;
     }
 
-    let csvContent = "No,Nama Peminjam,Status Peminjam,Alokasi,Ket Instalasi,Kode Alat,Nama Alat,Tgl Pinjam,Tgl Kembali,Kondisi Kembali,Status\n";
+    // PENTING: Menggunakan titik koma (;) sebagai pemisah agar terbaca di Excel/WPS Indonesia
+    let csvContent = "No;Nama Peminjam;Status Peminjam;Alokasi;Ket Instalasi;Kode Alat;Nama Alat;Tgl Pinjam;Tgl Kembali;Kondisi Kembali;Status\n";
 
+    // Isi Data
     dataPeminjaman.forEach((item, index) => {
-        let nama = item.nama_peminjam.replace(/,/g, ' ');
-        let ket = (item.keterangan || '').replace(/,/g, ' ');
-        let ketInstalasi = (item.ket_instalasi || '').replace(/,/g, ' ');
+        // Bersihkan data dari karakter titik koma agar tidak merusak format
+        let nama = (item.nama_peminjam || '').replace(/;/g, ' ');
+        let ketInstalasi = (item.ket_instalasi || '').replace(/;/g, ' ');
+        let alokasi = (item.alokasi || '-').replace(/;/g, ' ');
         
-        csvContent += `${index + 1},${nama},${item.status_peminjam},${item.alokasi || '-'},${ketInstalasi},${item.kode_alat},${item.nama_alat},${item.tanggal},${item.tanggal_kembali || '-'},${item.kondisi_kembali || '-'},${item.status}\n`;
+        // Jika kosong, tampilkan tanda strip (-) agar rapi
+        let tglKembali = item.tanggal_kembali ? item.tanggal_kembali : '-';
+        let kondisiKembali = item.kondisi_kembali ? item.kondisi_kembali : '-';
+
+        csvContent += `${index + 1};${nama};${item.status_peminjam};${alokasi};${ketInstalasi};${item.kode_alat};${item.nama_alat};${item.tanggal};${tglKembali};${kondisiKembali};${item.status}\n`;
     });
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    // Membuat file dan memicu download (Tambahkan BOM UTF-8 agar karakter terbaca sempurna)
+    const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
