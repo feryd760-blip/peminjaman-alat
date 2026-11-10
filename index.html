@@ -20,7 +20,7 @@
         </div>
         <div class="admin-profile text-center p-3 border-bottom border-light">
             <img src="logo.png" class="rounded-circle mb-2 bg-white" alt="Logo Admin" width="70" height="70" style="object-fit: cover; padding: 5px;">
-            <h6 class="mb-0">CENTRALWORKSHOP</h6>
+            <h6 class="mb-0">ADMINISTRATOR</h6>
         </div>
         <ul class="nav flex-column mt-2">
             <li class="nav-item">
@@ -31,6 +31,10 @@
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="#" onclick="bukaMenu('alat', this)"><i class="fas fa-tools me-2"></i> Data Master Alat</a>
+            </li>
+            <!-- MENU LAPORAN BARU -->
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="bukaMenu('laporan', this)"><i class="fas fa-file-excel me-2"></i> Laporan</a>
             </li>
         </ul>
     </div>
@@ -47,7 +51,6 @@
             
             <!-- 1. HALAMAN DASHBOARD -->
             <div id="halaman-dashboard">
-                <!-- KOTAK STATISTIK -->
                 <div class="row mb-4">
                     <div class="col-md-4">
                         <div class="info-box bg-teal">
@@ -78,7 +81,6 @@
                     </div>
                 </div>
 
-                <!-- TABEL DENGAN TAB -->
                 <div class="card shadow-sm mt-4">
                     <div class="card-header bg-white">
                         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -89,7 +91,6 @@
                             </div>
                         </div>
                         
-                        <!-- NAVIGASI TAB -->
                         <ul class="nav nav-tabs" id="myTab" role="tablist">
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link active" id="tab-fabrikasi" data-bs-toggle="tab" data-bs-target="#konten-fabrikasi" type="button" role="tab" onclick="gantiTab('Fabrikasi')">Fabrikasi</button>
@@ -102,7 +103,6 @@
                     
                     <div class="card-body">
                         <div class="tab-content" id="myTabContent">
-                            <!-- TAB FABRIKASI -->
                             <div class="tab-pane fade show active" id="konten-fabrikasi" role="tabpanel">
                                 <div class="table-responsive">
                                     <table class="table table-bordered table-hover">
@@ -121,7 +121,6 @@
                                 </div>
                             </div>
                             
-                            <!-- TAB INSTALASI -->
                             <div class="tab-pane fade" id="konten-instalasi" role="tabpanel">
                                 <div class="table-responsive">
                                     <table class="table table-bordered table-hover">
@@ -131,6 +130,7 @@
                                                 <th>Nama Peminjam</th>
                                                 <th>Status Peminjam</th>
                                                 <th>Kode & Nama Alat</th>
+                                                <th>Ket Instalasi</th>
                                                 <th>Tgl Pinjam</th>
                                                 <th>Aksi</th>
                                             </tr>
@@ -161,6 +161,7 @@
                                         <th>Status & Ket</th>
                                         <th>Alat</th>
                                         <th>Alokasi</th>
+                                        <th>Ket Instalasi</th>
                                         <th>Tgl Pinjam</th>
                                         <th>Tgl Kembali</th>
                                         <th>Kondisi Kembali</th>
@@ -198,6 +199,21 @@
                                 <tbody id="tabelAlat"></tbody>
                             </table>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. HALAMAN LAPORAN -->
+            <div id="halaman-laporan" class="d-none">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h6 class="mb-0">Laporan Peminjaman</h6>
+                    </div>
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-file-excel fa-5x text-success mb-4"></i>
+                        <h4>Download Data Peminjaman</h4>
+                        <p class="text-muted">Klik tombol di bawah ini untuk mengunduh seluruh riwayat peminjaman ke dalam format Excel (CSV).</p>
+                        <button class="btn btn-success btn-lg mt-3" onclick="downloadExcel()"><i class="fas fa-download me-2"></i> Download ke Excel</button>
                     </div>
                 </div>
             </div>
@@ -240,15 +256,22 @@
                     <label>Pilih Alat (Yang Tersedia)</label>
                     <select class="form-select" id="pinjamAlat" required></select>
                 </div>
-                <!-- MENU ALOKASI -->
+                
                 <div class="mb-3">
                     <label>Alokasi Pekerjaan</label>
-                    <select class="form-select" id="pinjamAlokasi" required>
+                    <select class="form-select" id="pinjamAlokasi" required onchange="cekAlokasi()">
                         <option value="">-- Pilih Alokasi --</option>
                         <option value="Fabrikasi">Fabrikasi</option>
                         <option value="Instalasi">Instalasi</option>
                     </select>
                 </div>
+                
+                <!-- KOLOM KETERANGAN INSTALASI (Tersembunyi default) -->
+                <div class="mb-3 d-none" id="divKetInstalasi">
+                    <label>Keterangan Instalasi</label>
+                    <input type="text" class="form-control" id="pinjamKetInstalasi" placeholder="Contoh: Instalasi Panel Lantai 2">
+                </div>
+
                 <div class="mb-3">
                     <label>Tanggal Pinjam</label>
                     <input type="date" class="form-control" id="pinjamTanggal" required>
