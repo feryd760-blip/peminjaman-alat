@@ -210,13 +210,15 @@ function cekAlokasi() {
     const divKetInstalasi = document.getElementById('divKetInstalasi');
     const inputKetInstalasi = document.getElementById('pinjamKetInstalasi');
 
+    // Jika memilih Instalasi, munculkan kotak keterangan
     if (alokasi === 'Instalasi') {
         divKetInstalasi.classList.remove('d-none');
         inputKetInstalasi.required = true;
     } else {
+        // Jika Fabrikasi atau kosong, sembunyikan kembali
         divKetInstalasi.classList.add('d-none');
         inputKetInstalasi.required = false;
-        inputKetInstalasi.value = '';
+        inputKetInstalasi.value = ''; // Kosongkan isinya
     }
 }
 
