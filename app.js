@@ -30,12 +30,10 @@ async function refreshData() {
     if (!supabaseClient) return;
 
     try {
-        // Ambil Data Alat
         const { data: alat, error: errAlat } = await supabaseClient.from('alat').select('*');
         if (errAlat) throw errAlat;
         dataAlat = alat || [];
 
-        // Ambil Data Peminjaman
         const { data: pinjam, error: errPinjam } = await supabaseClient.from('peminjaman').select('*').order('id', { ascending: false });
         if (errPinjam) throw errPinjam;
         dataPeminjaman = pinjam || [];
