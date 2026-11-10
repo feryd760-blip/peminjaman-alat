@@ -10,17 +10,6 @@ let dataAlat = [];
 let tabAktif = 'Fabrikasi'; 
 
 // ==========================================
-// 1. INISIALISASI SUPABASE
-// ==========================================
-const SUPABASE_URL = 'MASUKKAN_PROJECT_URL_ANDA'; 
-const SUPABASE_KEY = 'MASUKKAN_ANON_KEY_ANDA';
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-let dataPeminjaman = [];
-let dataAlat = [];
-let tabAktif = 'Fabrikasi'; 
-
-// ==========================================
 // 2. FUNGSI NAVIGASI
 // ==========================================
 window.bukaMenu = function(menu, elemen) {
@@ -178,7 +167,7 @@ function renderPeminjaman() {
                 <td>${displayStatus}</td>
                 <td><strong>${item.kode_alat}</strong> - ${item.nama_alat}</td>
                 <td>${item.alokasi || '-'}</td>
-                <td>${item.ket_instalasi || '-'}</td> <!-- TAMPILKAN KET INSTALASI -->
+                <td>${item.ket_instalasi || '-'}</td>
                 <td>${item.tanggal}</td>
                 <td>${tglKembali}</td>
                 <td>${displayKondisi}</td>
@@ -204,21 +193,18 @@ function cekStatusLainnya() {
     }
 }
 
-// Fungsi untuk memunculkan keterangan jika pilih Instalasi
 function cekAlokasi() {
     const alokasi = document.getElementById('pinjamAlokasi').value;
     const divKetInstalasi = document.getElementById('divKetInstalasi');
     const inputKetInstalasi = document.getElementById('pinjamKetInstalasi');
 
-    // Jika memilih Instalasi, munculkan kotak keterangan
     if (alokasi === 'Instalasi') {
         divKetInstalasi.classList.remove('d-none');
         inputKetInstalasi.required = true;
     } else {
-        // Jika Fabrikasi atau kosong, sembunyikan kembali
         divKetInstalasi.classList.add('d-none');
         inputKetInstalasi.required = false;
-        inputKetInstalasi.value = ''; // Kosongkan isinya
+        inputKetInstalasi.value = '';
     }
 }
 
@@ -426,10 +412,8 @@ function downloadExcel() {
         return;
     }
 
-    // Header CSV
     let csvContent = "No,Nama Peminjam,Status Peminjam,Alokasi,Ket Instalasi,Kode Alat,Nama Alat,Tgl Pinjam,Tgl Kembali,Kondisi Kembali,Status\n";
 
-    // Isi Data
     dataPeminjaman.forEach((item, index) => {
         let nama = item.nama_peminjam.replace(/,/g, ' ');
         let ket = (item.keterangan || '').replace(/,/g, ' ');
@@ -438,7 +422,6 @@ function downloadExcel() {
         csvContent += `${index + 1},${nama},${item.status_peminjam},${item.alokasi || '-'},${ketInstalasi},${item.kode_alat},${item.nama_alat},${item.tanggal},${item.tanggal_kembali || '-'},${item.kondisi_kembali || '-'},${item.status}\n`;
     });
 
-    // Membuat file dan memicu download
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
