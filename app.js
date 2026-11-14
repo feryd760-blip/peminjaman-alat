@@ -29,27 +29,29 @@ window.bukaMenu = function(menu, elemen) {
 // ==========================================
 async function refreshData() {
     if (!supabaseClient) return;
+
     try {
-        // 1. Ambil Alat (cara biasa)
+        // 1. Ambil Data Alat (Cara biasa)
         const { data: alat, error: errAlat } = await supabaseClient.from('alat').select('*');
         if (errAlat) throw errAlat;
         dataAlat = alat || [];
 
-        // 2. Ambil Peminjaman (pakai fungsi RPC untuk bypass cache)
-        const { data: pinjam, error: errPinjam } = await supabaseClient.rpc('ambil_semua_peminjaman');
+        // 2. Ambil Data Peminjaman (Menggunakan fungsi RPC yang baru)
+        // Perhatikan nama fungsinya: 'get_data_peminjaman'
+        const { data: pinjam, error: errPinjam } = await supabaseClient.rpc('get_data_peminjaman');
+        
         if (errPinjam) throw errPinjam;
         dataPeminjaman = pinjam || [];
 
-        // Render ke layar
+        // 3. Tampilkan ke layar
         renderDashboard();
         renderPeminjaman();
         renderAlat();
     } catch (error) {
-        console.error("Gagal:", error.message);
+        console.error("Gagal mengambil data:", error.message);
         alert("Error Database: " + error.message);
     }
-}
-// ==========================================
+}// ==========================================
 // 4. LOGIKA DASHBOARD & TAB
 // ==========================================
 function renderDashboard() {
