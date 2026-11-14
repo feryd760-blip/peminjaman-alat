@@ -1,7 +1,7 @@
 // ==========================================
 // 1. INISIALISASI SUPABASE
 // ==========================================
-const SUPABASE_URL = 'https://yoxumvjdfpaecvbtzcnv.supabase.co'; 
+const SUPABASE_URL = 'https://yavqawvkxpapuxqdkqcc.supabase.co'; 
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlhdnFhd3ZreHBhcHV4cWRrcWNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM2NjYwMjYsImV4cCI6MjEwOTI0MjAyNn0.ZCjVq5yIuZeYzws809ANKgLBxHaMkdv6oLLVzqAp7dU';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
