@@ -7,39 +7,26 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#2a7d7d">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-    <!-- SIDEBAR -->
     <div class="sidebar">
         <div class="sidebar-header">
             <h5><i>ALATKERJA</i></h5>
         </div>
         <div class="admin-profile text-center p-3 border-bottom border-light">
-            <img src="logo.png" class="rounded-circle mb-2 bg-white" alt="Logo Admin" width="70" height="70" style="object-fit: cover; padding: 5px;">
+            <img src="logo.png" class="rounded-circle mb-2 bg-white" alt="Logo" width="70" height="70" style="object-fit: cover; padding: 5px;">
             <h6 class="mb-0">ADMINISTRATOR</h6>
         </div>
         <ul class="nav flex-column mt-2">
-            <li class="nav-item">
-                <a class="nav-link active" href="#" onclick="bukaMenu('dashboard', this)"><i class="fas fa-tachometer-alt me-2"></i> Dashboard</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#" onclick="bukaMenu('peminjaman', this)"><i class="fas fa-clipboard-list me-2"></i> Peminjaman Alat</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#" onclick="bukaMenu('alat', this)"><i class="fas fa-tools me-2"></i> Data Master Alat</a>
-            </li>
-            <!-- MENU LAPORAN BARU -->
-            <li class="nav-item">
-                <a class="nav-link" href="#" onclick="bukaMenu('laporan', this)"><i class="fas fa-file-excel me-2"></i> Laporan</a>
-            </li>
+            <li class="nav-item"><a class="nav-link active" href="#" onclick="bukaMenu('dashboard', this)"><i class="fas fa-tachometer-alt me-2"></i> Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link" href="#" onclick="bukaMenu('peminjaman', this)"><i class="fas fa-clipboard-list me-2"></i> Peminjaman Alat</a></li>
+            <li class="nav-item"><a class="nav-link" href="#" onclick="bukaMenu('alat', this)"><i class="fas fa-tools me-2"></i> Data Master Alat</a></li>
+            <li class="nav-item"><a class="nav-link" href="#" onclick="bukaMenu('laporan', this)"><i class="fas fa-file-excel me-2"></i> Laporan</a></li>
         </ul>
     </div>
 
-    <!-- KONTEN UTAMA -->
     <div class="main-content">
         <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
             <div class="container-fluid">
@@ -48,103 +35,41 @@
         </nav>
 
         <div class="container-fluid mt-4">
-            
-            <!-- 1. HALAMAN DASHBOARD -->
+            <!-- DASHBOARD -->
             <div id="halaman-dashboard">
                 <div class="row mb-4">
-                    <div class="col-md-4">
-                        <div class="info-box bg-teal">
-                            <div class="info-box-icon"><i class="fas fa-clock"></i></div>
-                            <div class="info-box-content">
-                                <span class="info-box-text">Belum Kembali</span>
-                                <span class="info-box-number" id="statBelumKembali">0</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="info-box bg-orange">
-                            <div class="info-box-icon"><i class="fas fa-tools"></i></div>
-                            <div class="info-box-content">
-                                <span class="info-box-text">Alat Rusak</span>
-                                <span class="info-box-number" id="statAlatRusak">0</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="info-box bg-red">
-                            <div class="info-box-icon"><i class="fas fa-exclamation-triangle"></i></div>
-                            <div class="info-box-content">
-                                <span class="info-box-text">Alat Hilang</span>
-                                <span class="info-box-number" id="statAlatHilang">0</span>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="col-md-4"><div class="info-box bg-teal"><div class="info-box-icon"><i class="fas fa-clock"></i></div><div class="info-box-content"><span class="info-box-text">Belum Kembali</span><span class="info-box-number" id="statBelumKembali">0</span></div></div></div>
+                    <div class="col-md-4"><div class="info-box bg-orange"><div class="info-box-icon"><i class="fas fa-tools"></i></div><div class="info-box-content"><span class="info-box-text">Alat Rusak</span><span class="info-box-number" id="statAlatRusak">0</span></div></div></div>
+                    <div class="col-md-4"><div class="info-box bg-red"><div class="info-box-icon"><i class="fas fa-exclamation-triangle"></i></div><div class="info-box-content"><span class="info-box-text">Alat Hilang</span><span class="info-box-number" id="statAlatHilang">0</span></div></div></div>
                 </div>
-
                 <div class="card shadow-sm mt-4">
                     <div class="card-header bg-white">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h6 class="mb-0 text-danger"><i class="fas fa-exclamation-circle"></i> Alat Belum Dikembalikan</h6>
                             <div class="input-group w-50">
                                 <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
-                                <input type="text" class="form-control" id="searchDashboard" placeholder="Cari nama peminjam atau alat..." onkeyup="cariDashboard()">
+                                <input type="text" class="form-control" id="searchDashboard" placeholder="Cari..." onkeyup="cariDashboard()">
                             </div>
                         </div>
-                        
                         <ul class="nav nav-tabs" id="myTab" role="tablist">
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="tab-fabrikasi" data-bs-toggle="tab" data-bs-target="#konten-fabrikasi" type="button" role="tab" onclick="gantiTab('Fabrikasi')">Fabrikasi</button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="tab-instalasi" data-bs-toggle="tab" data-bs-target="#konten-instalasi" type="button" role="tab" onclick="gantiTab('Instalasi')">Instalasi</button>
-                            </li>
+                            <li class="nav-item"><button class="nav-link active" id="tab-fabrikasi" data-bs-toggle="tab" data-bs-target="#konten-fabrikasi" type="button" onclick="gantiTab('Fabrikasi')">Fabrikasi</button></li>
+                            <li class="nav-item"><button class="nav-link" id="tab-instalasi" data-bs-toggle="tab" data-bs-target="#konten-instalasi" type="button" onclick="gantiTab('Instalasi')">Instalasi</button></li>
                         </ul>
                     </div>
-                    
                     <div class="card-body">
-                        <div class="tab-content" id="myTabContent">
-                            <div class="tab-pane fade show active" id="konten-fabrikasi" role="tabpanel">
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-hover">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>No</th>
-                                                <th>Nama Peminjam</th>
-                                                <th>Status Peminjam</th>
-                                                <th>Kode & Nama Alat</th>
-                                                <th>Tgl Pinjam</th>
-                                                <th>Aksi</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="tabelFabrikasi"></tbody>
-                                    </table>
-                                </div>
+                        <div class="tab-content">
+                            <div class="tab-pane fade show active" id="konten-fabrikasi">
+                                <table class="table table-bordered table-hover"><thead class="table-light"><tr><th>No</th><th>Nama</th><th>Status</th><th>Alat</th><th>Tgl Pinjam</th><th>Aksi</th></tr></thead><tbody id="tabelFabrikasi"></tbody></table>
                             </div>
-                            
-                            <div class="tab-pane fade" id="konten-instalasi" role="tabpanel">
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-hover">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>No</th>
-                                                <th>Nama Peminjam</th>
-                                                <th>Status Peminjam</th>
-                                                <th>Kode & Nama Alat</th>
-                                                <th>Ket Instalasi</th>
-                                                <th>Tgl Pinjam</th>
-                                                <th>Aksi</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="tabelInstalasi"></tbody>
-                                    </table>
-                                </div>
+                            <div class="tab-pane fade" id="konten-instalasi">
+                                <table class="table table-bordered table-hover"><thead class="table-light"><tr><th>No</th><th>Nama</th><th>Status</th><th>Alat</th><th>Ket Instalasi</th><th>Tgl Pinjam</th><th>Aksi</th></tr></thead><tbody id="tabelInstalasi"></tbody></table>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 2. HALAMAN PEMINJAMAN -->
+            <!-- PEMINJAMAN -->
             <div id="halaman-peminjaman" class="d-none">
                 <div class="card shadow-sm">
                     <div class="card-header bg-white d-flex justify-content-between align-items-center">
@@ -152,31 +77,12 @@
                         <button class="btn btn-primary btn-sm" onclick="bukaModalPinjam()"><i class="fas fa-plus"></i> Pinjam Alat</button>
                     </div>
                     <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-hover">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>No</th>
-                                        <th>Nama Peminjam</th>
-                                        <th>Status & Ket</th>
-                                        <th>Alat</th>
-                                        <th>Alokasi</th>
-                                        <th>Ket Instalasi</th>
-                                        <th>Tgl Pinjam</th>
-                                        <th>Tgl Kembali</th>
-                                        <th>Kondisi Kembali</th>
-                                        <th>Status</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabelPeminjaman"></tbody>
-                            </table>
-                        </div>
+                        <table class="table table-bordered table-hover"><thead class="table-light"><tr><th>No</th><th>Nama</th><th>Status</th><th>Alat</th><th>Alokasi</th><th>Ket Instalasi</th><th>Tgl Pinjam</th><th>Tgl Kembali</th><th>Kondisi</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="tabelPeminjaman"></tbody></table>
                     </div>
                 </div>
             </div>
 
-            <!-- 3. HALAMAN DATA ALAT -->
+            <!-- DATA ALAT -->
             <div id="halaman-alat" class="d-none">
                 <div class="card shadow-sm">
                     <div class="card-header bg-white d-flex justify-content-between align-items-center">
@@ -184,217 +90,68 @@
                         <button class="btn btn-primary btn-sm" onclick="bukaModalAlat()"><i class="fas fa-plus"></i> Tambah Alat</button>
                     </div>
                     <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-hover">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>No</th>
-                                        <th>Kode Alat</th>
-                                        <th>Nama Alat</th>
-                                        <th>Kondisi</th>
-                                        <th>Status</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabelAlat"></tbody>
-                            </table>
-                        </div>
+                        <table class="table table-bordered table-hover"><thead class="table-light"><tr><th>No</th><th>Kode</th><th>Nama</th><th>Kondisi</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="tabelAlat"></tbody></table>
                     </div>
                 </div>
             </div>
 
-            <!-- 4. HALAMAN LAPORAN -->
+            <!-- LAPORAN -->
             <div id="halaman-laporan" class="d-none">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-white">
-                        <h6 class="mb-0">Laporan Peminjaman</h6>
-                    </div>
-                    <div class="card-body text-center py-5">
-                        <i class="fas fa-file-excel fa-5x text-success mb-4"></i>
-                        <h4>Download Data Peminjaman</h4>
-                        <p class="text-muted">Klik tombol di bawah ini untuk mengunduh seluruh riwayat peminjaman ke dalam format Excel (CSV).</p>
-                        <button class="btn btn-success btn-lg mt-3" onclick="downloadExcel()"><i class="fas fa-download me-2"></i> Download ke Excel</button>
-                    </div>
+                <div class="card shadow-sm text-center py-5">
+                    <i class="fas fa-file-excel fa-5x text-success mb-4"></i>
+                    <h4>Download Data Peminjaman</h4>
+                    <button class="btn btn-success btn-lg mt-3" onclick="downloadExcel()"><i class="fas fa-download me-2"></i> Download ke Excel</button>
                 </div>
             </div>
-
         </div>
     </div>
 
     <!-- MODAL PINJAM -->
     <div class="modal fade" id="modalPinjam" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Form Peminjaman Alat</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <form id="formPinjam">
-                <div class="mb-3">
-                    <label>Nama Peminjam</label>
-                    <input type="text" class="form-control" id="pinjamNama" required placeholder="Masukkan nama">
-                </div>
-                <div class="mb-3">
-                    <label>Status Peminjam</label>
-                    <select class="form-select" id="pinjamStatus" required onchange="cekStatusLainnya()">
-                        <option value="">-- Pilih Status --</option>
-                        <option value="Karyawan">Karyawan</option>
-                        <option value="Kontraktor HDI">Kontraktor HDI</option>
-                        <option value="Kontraktor Puguh">Kontraktor Puguh</option>
-                        <option value="Kontraktor Tutur">Kontraktor Tutur</option>
-                        <option value="Kontraktor Muri">Kontraktor Muri</option>
-                        <option value="Kontraktor Rofii">Kontraktor Rofii</option>
-                        <option value="Lainnya">Lainnya</option>
-                    </select>
-                </div>
-                <div class="mb-3 d-none" id="divKeterangan">
-                    <label>Keterangan (Isi Manual)</label>
-                    <input type="text" class="form-control" id="pinjamKeterangan" placeholder="Contoh: Vendor Kebersihan">
-                </div>
-                <div class="mb-3">
-                    <label>Pilih Alat (Yang Tersedia)</label>
-                    <select class="form-select" id="pinjamAlat" required></select>
-                </div>
-                
-                <div class="mb-3">
-                    <label>Alokasi Pekerjaan</label>
-                    <select class="form-select" id="pinjamAlokasi" required onchange="cekAlokasi()">
-                        <option value="">-- Pilih Alokasi --</option>
-                        <option value="Fabrikasi">Fabrikasi</option>
-                        <option value="Instalasi">Instalasi</option>
-                    </select>
-                </div>
-                
-                <!-- KOLOM KETERANGAN INSTALASI (Tersembunyi default) -->
-                <div class="mb-3 d-none" id="divKetInstalasi">
-                    <label>Keterangan Instalasi</label>
-                    <input type="text" class="form-control" id="pinjamKetInstalasi" placeholder="Contoh: Instalasi Panel Lantai 2">
-                </div>
-
-                <div class="mb-3">
-                    <label>Tanggal Pinjam</label>
-                    <input type="date" class="form-control" id="pinjamTanggal" required>
-                </div>
-                <div class="modal-footer px-0 pb-0">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan Peminjaman</button>
-                </div>
-            </form>
-          </div>
-        </div>
-      </div>
+      <div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Form Peminjaman</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body"><form id="formPinjam">
+          <div class="mb-3"><label>Nama Peminjam</label><input type="text" class="form-control" id="pinjamNama" required></div>
+          <div class="mb-3"><label>Status Peminjam</label><select class="form-select" id="pinjamStatus" required onchange="cekStatusLainnya()"><option value="">-- Pilih --</option><option value="Karyawan">Karyawan</option><option value="Kontraktor HDI">Kontraktor HDI</option><option value="Kontraktor Puguh">Kontraktor Puguh</option><option value="Lainnya">Lainnya</option></select></div>
+          <div class="mb-3 d-none" id="divKeterangan"><label>Keterangan</label><input type="text" class="form-control" id="pinjamKeterangan"></div>
+          <div class="mb-3"><label>Pilih Alat</label><select class="form-select" id="pinjamAlat" required></select></div>
+          <div class="mb-3"><label>Alokasi Pekerjaan</label><select class="form-select" id="pinjamAlokasi" required onchange="cekAlokasi()"><option value="">-- Pilih --</option><option value="Fabrikasi">Fabrikasi</option><option value="Instalasi">Instalasi</option></select></div>
+          <div class="mb-3 d-none" id="divKetInstalasi"><label>Keterangan Instalasi</label><input type="text" class="form-control" id="pinjamKetInstalasi"></div>
+          <div class="mb-3"><label>Tanggal Pinjam</label><input type="date" class="form-control" id="pinjamTanggal" required></div>
+          <div class="modal-footer px-0 pb-0"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button><button type="submit" class="btn btn-primary">Simpan</button></div>
+      </form></div></div></div>
     </div>
 
-    <!-- MODAL TAMBAH ALAT -->
+    <!-- MODAL ALAT -->
     <div class="modal fade" id="modalAlat" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Tambah Alat Baru</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <form id="formAlat">
-                <div class="mb-3">
-                    <label>Kode Alat</label>
-                    <input type="text" class="form-control" id="alatKode" required placeholder="Contoh: ALT-001">
-                </div>
-                <div class="mb-3">
-                    <label>Nama Alat</label>
-                    <input type="text" class="form-control" id="alatNama" required placeholder="Contoh: Bor Listrik">
-                </div>
-                <div class="mb-3">
-                    <label>Kondisi Awal</label>
-                    <select class="form-select" id="alatKondisi" required>
-                        <option value="Baik">Baik</option>
-                        <option value="Rusak">Rusak</option>
-                        <option value="Hilang">Hilang</option>
-                    </select>
-                </div>
-                <div class="modal-footer px-0 pb-0">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-success">Simpan Alat</button>
-                </div>
-            </form>
-          </div>
-        </div>
-      </div>
+      <div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Tambah Alat</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body"><form id="formAlat">
+          <div class="mb-3"><label>Kode</label><input type="text" class="form-control" id="alatKode" required></div>
+          <div class="mb-3"><label>Nama</label><input type="text" class="form-control" id="alatNama" required></div>
+          <div class="mb-3"><label>Kondisi</label><select class="form-select" id="alatKondisi" required><option value="Baik">Baik</option><option value="Rusak">Rusak</option><option value="Hilang">Hilang</option></select></div>
+          <div class="modal-footer px-0 pb-0"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button><button type="submit" class="btn btn-success">Simpan</button></div>
+      </form></div></div></div>
     </div>
 
     <!-- MODAL EDIT ALAT -->
     <div class="modal fade" id="modalEditAlat" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header bg-primary text-white">
-            <h5 class="modal-title">Edit Data Alat</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <form id="formEditAlat">
-                <input type="hidden" id="editAlatId">
-                <div class="mb-3">
-                    <label>Kode Alat</label>
-                    <input type="text" class="form-control" id="editAlatKode" required readonly>
-                </div>
-                <div class="mb-3">
-                    <label>Nama Alat</label>
-                    <input type="text" class="form-control" id="editAlatNama" required>
-                </div>
-                <div class="mb-3">
-                    <label>Kondisi Alat</label>
-                    <select class="form-select" id="editAlatKondisi" required>
-                        <option value="Baik">Baik</option>
-                        <option value="Rusak">Rusak</option>
-                        <option value="Hilang">Hilang</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label>Status Alat</label>
-                    <select class="form-select" id="editAlatStatus" required>
-                        <option value="Tersedia">Tersedia</option>
-                        <option value="Tidak Tersedia">Tidak Tersedia</option>
-                        <option value="Dipinjam">Dipinjam</option>
-                    </select>
-                </div>
-                <div class="modal-footer px-0 pb-0">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
-                </div>
-            </form>
-          </div>
-        </div>
-      </div>
+      <div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Edit Alat</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body"><form id="formEditAlat">
+          <input type="hidden" id="editAlatId"><input type="hidden" id="editAlatKode">
+          <div class="mb-3"><label>Nama</label><input type="text" class="form-control" id="editAlatNama" required></div>
+          <div class="mb-3"><label>Kondisi</label><select class="form-select" id="editAlatKondisi" required><option value="Baik">Baik</option><option value="Rusak">Rusak</option><option value="Hilang">Hilang</option></select></div>
+          <div class="mb-3"><label>Status</label><select class="form-select" id="editAlatStatus" required><option value="Tersedia">Tersedia</option><option value="Tidak Tersedia">Tidak Tersedia</option><option value="Dipinjam">Dipinjam</option></select></div>
+          <div class="modal-footer px-0 pb-0"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button><button type="submit" class="btn btn-primary">Simpan</button></div>
+      </form></div></div></div>
     </div>
 
-    <!-- MODAL KEMBALIKAN ALAT -->
+    <!-- MODAL KEMBALI -->
     <div class="modal fade" id="modalKembali" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header bg-danger text-white">
-            <h5 class="modal-title">Konfirmasi Pengembalian</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <form id="formKembali">
-                <input type="hidden" id="kembaliId">
-                <p>Apakah Anda yakin ingin menandai alat ini sudah dikembalikan?</p>
-                <div class="mb-3">
-                    <label>Kondisi Alat Saat Dikembalikan</label>
-                    <select class="form-select" id="kembaliKondisi" required>
-                        <option value="Baik">Baik</option>
-                        <option value="Rusak">Rusak</option>
-                        <option value="Hilang">Hilang</option>
-                    </select>
-                </div>
-                <div class="modal-footer px-0 pb-0">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-danger">Ya, Kembalikan</button>
-                </div>
-            </form>
-          </div>
-        </div>
-      </div>
+      <div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-danger text-white"><h5 class="modal-title">Kembalikan Alat</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body"><form id="formKembali">
+          <input type="hidden" id="kembaliId">
+          <div class="mb-3"><label>Kondisi Saat Kembali</label><select class="form-select" id="kembaliKondisi" required><option value="Baik">Baik</option><option value="Rusak">Rusak</option><option value="Hilang">Hilang</option></select></div>
+          <div class="modal-footer px-0 pb-0"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button><button type="submit" class="btn btn-danger">Ya, Kembalikan</button></div>
+      </form></div></div></div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
