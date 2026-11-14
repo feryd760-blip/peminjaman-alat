@@ -31,26 +31,27 @@ async function refreshData() {
     if (!supabaseClient) return;
 
     try {
-        // 1. Ambil Data Alat (Cara biasa)
+        // 1. Ambil Alat (Cara biasa)
         const { data: alat, error: errAlat } = await supabaseClient.from('alat').select('*');
         if (errAlat) throw errAlat;
         dataAlat = alat || [];
 
-        // 2. Ambil Data Peminjaman (Menggunakan fungsi RPC yang baru)
-        // Perhatikan nama fungsinya: 'get_data_peminjaman'
-        const { data: pinjam, error: errPinjam } = await supabaseClient.rpc('get_data_peminjaman');
+        // 2. Ambil Peminjaman menggunakan fungsi JSON (Bypass total)
+        const { data: pinjamJson, error: errPinjam } = await supabaseClient.rpc('get_peminjaman_json');
         
         if (errPinjam) throw errPinjam;
-        dataPeminjaman = pinjam || [];
+        
+        // Karena hasilnya berupa JSON, kita langsung gunakan
+        dataPeminjaman = pinjamJson || [];
 
-        // 3. Tampilkan ke layar
         renderDashboard();
         renderPeminjaman();
         renderAlat();
     } catch (error) {
-        console.error("Gagal mengambil data:", error.message);
+        console.error("Gagal:", error.message);
         alert("Error Database: " + error.message);
     }
+}
 }// ==========================================
 // 4. LOGIKA DASHBOARD & TAB
 // ==========================================
