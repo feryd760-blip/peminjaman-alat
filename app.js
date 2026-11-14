@@ -30,7 +30,7 @@ async function refreshData() {
     if (!supabaseClient) return;
 
     try {
-        const { data: alat, error: errAlat } = await supabaseClient.from('alat').select('*');
+        const { data: alat, error: errAlat } = await supabaseClient.from('alat').select('*').order('id', { ascending: true });
         if (errAlat) throw errAlat;
         dataAlat = alat || [];
 
@@ -43,7 +43,9 @@ async function refreshData() {
         renderAlat();
     } catch (error) {
         console.error("Gagal mengambil data:", error.message);
-        alert("Error Database: " + error.message);
+        renderDashboard();
+        renderPeminjaman();
+        renderAlat();
     }
 }
 
@@ -165,7 +167,7 @@ function renderPeminjaman() {
                 <td>${displayStatus}</td>
                 <td><strong>${item.kode_alat}</strong> - ${item.nama_alat}</td>
                 <td>${item.alokasi || '-'}</td>
-                <td>${item.ket_instalasi || '-'}</td>
+                <td>${item.ket_instalasi || '-'}</td> <!-- TAMPILKAN KET INSTALASI -->
                 <td>${item.tanggal}</td>
                 <td>${tglKembali}</td>
                 <td>${displayKondisi}</td>
@@ -191,6 +193,7 @@ function cekStatusLainnya() {
     }
 }
 
+// Fungsi untuk memunculkan keterangan jika pilih Instalasi
 function cekAlokasi() {
     const alokasi = document.getElementById('pinjamAlokasi').value;
     const divKetInstalasi = document.getElementById('divKetInstalasi');
@@ -410,20 +413,20 @@ function downloadExcel() {
         return;
     }
 
-    let csvContent = "No;Nama Peminjam;Status Peminjam;Alokasi;Ket Instalasi;Kode Alat;Nama Alat;Tgl Pinjam;Tgl Kembali;Kondisi Kembali;Status\n";
+    // Header CSV
+    let csvContent = "No,Nama Peminjam,Status Peminjam,Alokasi,Ket Instalasi,Kode Alat,Nama Alat,Tgl Pinjam,Tgl Kembali,Kondisi Kembali,Status\n";
 
+    // Isi Data
     dataPeminjaman.forEach((item, index) => {
-        let nama = (item.nama_peminjam || '').replace(/;/g, ' ');
-        let ketInstalasi = (item.ket_instalasi || '').replace(/;/g, ' ');
-        let alokasi = (item.alokasi || '-').replace(/;/g, ' ');
+        let nama = item.nama_peminjam.replace(/,/g, ' ');
+        let ket = (item.keterangan || '').replace(/,/g, ' ');
+        let ketInstalasi = (item.ket_instalasi || '').replace(/,/g, ' ');
         
-        let tglKembali = item.tanggal_kembali ? item.tanggal_kembali : '-';
-        let kondisiKembali = item.kondisi_kembali ? item.kondisi_kembali : '-';
-
-        csvContent += `${index + 1};${nama};${item.status_peminjam};${alokasi};${ketInstalasi};${item.kode_alat};${item.nama_alat};${item.tanggal};${tglKembali};${kondisiKembali};${item.status}\n`;
+        csvContent += `${index + 1},${nama},${item.status_peminjam},${item.alokasi || '-'},${ketInstalasi},${item.kode_alat},${item.nama_alat},${item.tanggal},${item.tanggal_kembali || '-'},${item.kondisi_kembali || '-'},${item.status}\n`;
     });
 
-    const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+    // Membuat file dan memicu download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
