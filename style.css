@@ -1,4 +1,4 @@
-body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow-x: hidden; }
+body { background-color: #f4f6f9; font-family: 'Segoe UI', sans-serif; overflow-x: hidden; }
 .sidebar { width: 250px; background-color: #2a7d7d; color: white; position: fixed; top: 0; left: 0; height: 100vh; z-index: 1000; }
 .sidebar-header { padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: center; }
 .sidebar a.nav-link { color: rgba(255,255,255,0.8); padding: 12px 20px; border-left: 3px solid transparent; }
@@ -6,37 +6,6 @@ body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verda
 .main-content { margin-left: 250px; min-height: 100vh; }
 .info-box { border-radius: 4px; padding: 15px; color: white; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
 .info-box-icon { font-size: 2.5rem; opacity: 0.4; }
-.info-box-content { text-align: right; }
-.info-box-text { font-size: 1rem; display: block; }
-.info-box-number { font-size: 1.8rem; font-weight: bold; display: block; }
-.bg-teal { background-color: #399b9b; }
-.bg-green { background-color: #00a65a; }
-.bg-orange { background-color: #f39c12; }
-.bg-red { background-color: #dd4b39; }
-
-/* STYLE MODERN UNTUK TAB */
-.nav-tabs .nav-link {
-    color: #6c757d;
-    background-color: transparent;
-    border: 1px solid transparent;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-    transition: all 0.3s ease;
-    font-weight: 500;
-    padding: 10px 20px;
-}
-.nav-tabs .nav-link:hover {
-    color: #2a7d7d;
-    border-color: transparent;
-    background-color: rgba(42, 125, 125, 0.05);
-}
-.nav-tabs .nav-link.active {
-    color: white !important;
-    background-color: #2a7d7d !important;
-    border-color: #2a7d7d !important;
-    box-shadow: 0 4px 6px -1px rgba(42, 125, 125, 0.3);
-}
-.tab-content {
-    border-top: 2px solid #2a7d7d;
-    padding-top: 15px;
-}
+.info-box-text { font-size: 1rem; }
+.info-box-number { font-size: 1.8rem; font-weight: bold; }
+.bg-teal { background-color: #399b9b; } .bg-orange { background-color: #f39c12; } .bg-red { background-color: #dd4b39; }
