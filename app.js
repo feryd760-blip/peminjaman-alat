@@ -5,11 +5,13 @@ const SUPABASE_URL = 'https://yoxumvjdfpaecvbtzcnv.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlveHVtdmpkZnBhZWN2YnR6Y252Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQwNDQ5MzgsImV4cCI6MjEwOTYyMDkzOH0.jtpdBrKmWuwkVVlg_kr_4-7YexSD75xbVD9kCQPFNoc';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+
 let dataPeminjaman = [];
 let dataAlat = [];
+let tabAktif = 'Fabrikasi'; 
 
 // ==========================================
-// 2. NAVIGASI
+// 2. FUNGSI NAVIGASI
 // ==========================================
 window.bukaMenu = function(menu, elemen) {
     document.querySelectorAll('.container-fluid > div').forEach(el => el.classList.add('d-none'));
@@ -23,12 +25,13 @@ window.bukaMenu = function(menu, elemen) {
 }
 
 // ==========================================
-// 3. AMBIL DATA
+// 3. FUNGSI AMBIL DATA DARI DATABASE
 // ==========================================
 async function refreshData() {
     if (!supabaseClient) return;
+
     try {
-        const { data: alat, error: errAlat } = await supabaseClient.from('alat').select('*');
+        const { data: alat, error: errAlat } = await supabaseClient.from('alat').select('*').order('id', { ascending: true });
         if (errAlat) throw errAlat;
         dataAlat = alat || [];
 
@@ -40,116 +43,220 @@ async function refreshData() {
         renderPeminjaman();
         renderAlat();
     } catch (error) {
-        console.error("Gagal:", error.message);
-        alert("Error: " + error.message);
+        console.error("Gagal mengambil data:", error.message);
+        renderDashboard();
+        renderPeminjaman();
+        renderAlat();
     }
 }
 
 // ==========================================
-// 4. RENDER DASHBOARD
+// 4. LOGIKA DASHBOARD & TAB
 // ==========================================
 function renderDashboard() {
-    document.getElementById('statBelumKembali').innerText = dataPeminjaman.filter(p => p.status === 'Dipinjam').length;
-    document.getElementById('statAlatRusak').innerText = dataAlat.filter(a => a.kondisi === 'Rusak').length;
-    document.getElementById('statAlatHilang').innerText = dataAlat.filter(a => a.kondisi === 'Hilang').length;
+    const belumKembali = dataPeminjaman.filter(p => p.status === 'Dipinjam').length;
+    const statBK = document.getElementById('statBelumKembali');
+    if (statBK) statBK.innerText = belumKembali;
+
+    const alatRusak = dataAlat.filter(a => a.kondisi === 'Rusak').length;
+    const statRusak = document.getElementById('statAlatRusak');
+    if (statRusak) statRusak.innerText = alatRusak;
+
+    const alatHilang = dataAlat.filter(a => a.kondisi === 'Hilang').length;
+    const statHilang = document.getElementById('statAlatHilang');
+    if (statHilang) statHilang.innerText = alatHilang;
     
-    const keyword = document.getElementById('searchDashboard').value.toLowerCase();
+    const searchInput = document.getElementById('searchDashboard');
+    const keyword = searchInput ? searchInput.value.toLowerCase() : '';
+
     const dipinjamCocok = dataPeminjaman.filter(p => {
         if (p.status !== 'Dipinjam') return false;
-        return p.nama_peminjam.toLowerCase().includes(keyword) || p.nama_alat.toLowerCase().includes(keyword);
+        return p.nama_peminjam.toLowerCase().includes(keyword) || 
+               p.nama_alat.toLowerCase().includes(keyword) ||
+               p.kode_alat.toLowerCase().includes(keyword);
     });
 
-    const dataFab = dipinjamCocok.filter(p => p.alokasi === 'Fabrikasi');
-    const dataInst = dipinjamCocok.filter(p => p.alokasi === 'Instalasi');
+    const dataFabrikasi = dipinjamCocok.filter(p => p.alokasi === 'Fabrikasi');
+    const dataInstalasi = dipinjamCocok.filter(p => p.alokasi === 'Instalasi');
 
-    // Render Fabrikasi
     const tbodyFab = document.getElementById('tabelFabrikasi');
-    tbodyFab.innerHTML = dataFab.length === 0 ? `<tr><td colspan="6" class="text-center">Kosong</td></tr>` : '';
-    dataFab.forEach((item, index) => {
-        tbodyFab.innerHTML += `<tr><td>${index+1}</td><td>${item.nama_peminjam}</td><td>${item.status_peminjam}</td><td>${item.kode_alat} - ${item.nama_alat}</td><td>${item.tanggal}</td><td><button class="btn btn-sm btn-danger" onclick="bukaModalKembali(${item.id})">Kembalikan</button></td></tr>`;
-    });
+    if (tbodyFab) {
+        tbodyFab.innerHTML = '';
+        if (dataFabrikasi.length === 0) {
+            tbodyFab.innerHTML = `<tr><td colspan="6" class="text-center text-success">Tidak ada data Fabrikasi yang belum kembali.</td></tr>`;
+        } else {
+            dataFabrikasi.forEach((item, index) => {
+                tbodyFab.innerHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${item.nama_peminjam}</td>
+                        <td><span class="badge bg-secondary">${item.status_peminjam}</span></td>
+                        <td><strong>${item.kode_alat}</strong> - ${item.nama_alat}</td>
+                        <td>${item.tanggal}</td>
+                        <td><button class="btn btn-sm btn-danger" onclick="bukaModalKembali(${item.id})"><i class="fas fa-undo"></i> Kembalikan</button></td>
+                    </tr>
+                `;
+            });
+        }
+    }
 
-    // Render Instalasi
     const tbodyInst = document.getElementById('tabelInstalasi');
-    tbodyInst.innerHTML = dataInst.length === 0 ? `<tr><td colspan="7" class="text-center">Kosong</td></tr>` : '';
-    dataInst.forEach((item, index) => {
-        tbodyInst.innerHTML += `<tr><td>${index+1}</td><td>${item.nama_peminjam}</td><td>${item.status_peminjam}</td><td>${item.kode_alat} - ${item.nama_alat}</td><td>${item.ket_instalasi || '-'}</td><td>${item.tanggal}</td><td><button class="btn btn-sm btn-danger" onclick="bukaModalKembali(${item.id})">Kembalikan</button></td></tr>`;
-    });
+    if (tbodyInst) {
+        tbodyInst.innerHTML = '';
+        if (dataInstalasi.length === 0) {
+            tbodyInst.innerHTML = `<tr><td colspan="7" class="text-center text-success">Tidak ada data Instalasi yang belum kembali.</td></tr>`;
+        } else {
+            dataInstalasi.forEach((item, index) => {
+                tbodyInst.innerHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${item.nama_peminjam}</td>
+                        <td><span class="badge bg-secondary">${item.status_peminjam}</span></td>
+                        <td><strong>${item.kode_alat}</strong> - ${item.nama_alat}</td>
+                        <td>${item.ket_instalasi || '-'}</td>
+                        <td>${item.tanggal}</td>
+                        <td><button class="btn btn-sm btn-danger" onclick="bukaModalKembali(${item.id})"><i class="fas fa-undo"></i> Kembalikan</button></td>
+                    </tr>
+                `;
+            });
+        }
+    }
 }
 
-function cariDashboard() { renderDashboard(); }
-function gantiTab(nama) { /* Bootstrap tab handles UI, function for compatibility */ }
+function cariDashboard() {
+    renderDashboard();
+}
+
+function gantiTab(namaTab) {
+    tabAktif = namaTab;
+}
 
 // ==========================================
-// 5. RENDER PEMINJAMAN
+// 5. LOGIKA PEMINJAMAN
 // ==========================================
 function renderPeminjaman() {
     const tbody = document.getElementById('tabelPeminjaman');
-    tbody.innerHTML = dataPeminjaman.length === 0 ? `<tr><td colspan="11" class="text-center">Belum ada riwayat.</td></tr>` : '';
+    if (!tbody) return;
+    tbody.innerHTML = '';
     
+    if (dataPeminjaman.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="11" class="text-center">Belum ada riwayat.</td></tr>`;
+        return;
+    }
+
     dataPeminjaman.forEach((item, index) => {
-        let badge = item.status === 'Dipinjam' ? 'bg-warning text-dark' : 'bg-success';
+        let badgeClass = item.status === 'Dipinjam' ? 'bg-warning text-dark' : 'bg-success';
         let tglKembali = item.tanggal_kembali ? item.tanggal_kembali : '-';
-        let kondisi = item.kondisi_kembali ? item.kondisi_kembali : '-';
-        let displayStatus = item.status_peminjam === 'Lainnya' ? `Lainnya (${item.keterangan})` : item.status_peminjam;
+        
+        let displayStatus = item.status_peminjam;
+        if(item.status_peminjam === 'Lainnya' && item.keterangan) {
+            displayStatus += `<br><small class="text-muted">(${item.keterangan})</small>`;
+        }
+
+        let kondisiKembali = item.kondisi_kembali || '-';
+        let badgeKondisi = '';
+        if (kondisiKembali === 'Baik') badgeKondisi = 'bg-success';
+        if (kondisiKembali === 'Rusak') badgeKondisi = 'bg-warning text-dark';
+        if (kondisiKembali === 'Hilang') badgeKondisi = 'bg-danger';
+        
+        let displayKondisi = kondisiKembali !== '-' ? `<span class="badge ${badgeKondisi}">${kondisiKembali}</span>` : '-';
 
         tbody.innerHTML += `
             <tr>
-                <td>${index+1}</td><td>${item.nama_peminjam}</td><td>${displayStatus}</td>
-                <td>${item.kode_alat} - ${item.nama_alat}</td><td>${item.alokasi}</td>
-                <td>${item.ket_instalasi || '-'}</td><td>${item.tanggal}</td><td>${tglKembali}</td>
-                <td>${kondisi}</td><td><span class="badge ${badge}">${item.status}</span></td>
+                <td>${index + 1}</td>
+                <td>${item.nama_peminjam}</td>
+                <td>${displayStatus}</td>
+                <td><strong>${item.kode_alat}</strong> - ${item.nama_alat}</td>
+                <td>${item.alokasi || '-'}</td>
+                <td>${item.ket_instalasi || '-'}</td> <!-- TAMPILKAN KET INSTALASI -->
+                <td>${item.tanggal}</td>
+                <td>${tglKembali}</td>
+                <td>${displayKondisi}</td>
+                <td><span class="badge ${badgeClass}">${item.status}</span></td>
                 <td><button class="btn btn-sm btn-danger" onclick="hapusPeminjaman(${item.id})"><i class="fas fa-trash"></i></button></td>
-            </tr>`;
+            </tr>
+        `;
     });
 }
 
-// ==========================================
-// 6. FORM PEMINJAMAN & LOGIKA
-// ==========================================
 function cekStatusLainnya() {
-    const isLainnya = document.getElementById('pinjamStatus').value === 'Lainnya';
-    document.getElementById('divKeterangan').classList.toggle('d-none', !isLainnya);
-    document.getElementById('pinjamKeterangan').required = isLainnya;
+    const status = document.getElementById('pinjamStatus').value;
+    const divKet = document.getElementById('divKeterangan');
+    const inputKet = document.getElementById('pinjamKeterangan');
+    
+    if (status === 'Lainnya') {
+        divKet.classList.remove('d-none');
+        inputKet.required = true;
+    } else {
+        divKet.classList.add('d-none');
+        inputKet.required = false;
+        inputKet.value = '';
+    }
 }
 
+// Fungsi untuk memunculkan keterangan jika pilih Instalasi
 function cekAlokasi() {
-    const isInstalasi = document.getElementById('pinjamAlokasi').value === 'Instalasi';
-    document.getElementById('divKetInstalasi').classList.toggle('d-none', !isInstalasi);
-    document.getElementById('pinjamKetInstalasi').required = isInstalasi;
+    const alokasi = document.getElementById('pinjamAlokasi').value;
+    const divKetInstalasi = document.getElementById('divKetInstalasi');
+    const inputKetInstalasi = document.getElementById('pinjamKetInstalasi');
+
+    if (alokasi === 'Instalasi') {
+        divKetInstalasi.classList.remove('d-none');
+        inputKetInstalasi.required = true;
+    } else {
+        divKetInstalasi.classList.add('d-none');
+        inputKetInstalasi.required = false;
+        inputKetInstalasi.value = '';
+    }
 }
 
 function bukaModalPinjam() {
     document.getElementById('formPinjam').reset();
-    document.getElementById('divKeterangan').classList.add('d-none');
-    document.getElementById('divKetInstalasi').classList.add('d-none');
+    document.getElementById('divKeterangan').classList.add('d-none'); 
+    document.getElementById('divKetInstalasi').classList.add('d-none'); 
     
     const select = document.getElementById('pinjamAlat');
     select.innerHTML = '<option value="">-- Pilih Alat --</option>';
-    const alatTersedia = dataAlat.filter(a => a.status === 'Tersedia' && a.kondisi === 'Baik');
-    if (alatTersedia.length === 0) return alert("Tidak ada alat tersedia!");
     
-    alatTersedia.forEach(a => select.innerHTML += `<option value="${a.id}">${a.kode} - ${a.nama}</option>`);
+    const alatTersedia = dataAlat.filter(a => a.status === 'Tersedia' && a.kondisi === 'Baik');
+    
+    if (alatTersedia.length === 0) {
+        alert("Tidak ada alat dengan kondisi Baik yang siap dipinjam!");
+        return;
+    }
+
+    alatTersedia.forEach(a => {
+        select.innerHTML += `<option value="${a.id}">${a.kode} - ${a.nama}</option>`;
+    });
     new bootstrap.Modal(document.getElementById('modalPinjam')).show();
 }
 
 document.getElementById('formPinjam').addEventListener('submit', async function(e) {
     e.preventDefault();
+    const nama = document.getElementById('pinjamNama').value;
+    const statusPeminjam = document.getElementById('pinjamStatus').value;
+    const keterangan = document.getElementById('pinjamKeterangan').value;
     const alatId = parseInt(document.getElementById('pinjamAlat').value);
+    const alokasi = document.getElementById('pinjamAlokasi').value;
+    const ketInstalasi = document.getElementById('pinjamKetInstalasi').value;
+    const tanggal = document.getElementById('pinjamTanggal').value;
+    
     const alat = dataAlat.find(a => a.id === alatId);
     
-    const { error } = await supabaseClient.from('peminjaman').insert([{
-        nama_peminjam: document.getElementById('pinjamNama').value,
-        status_peminjam: document.getElementById('pinjamStatus').value,
-        keterangan: document.getElementById('pinjamKeterangan').value,
-        kode_alat: alat.kode, nama_alat: alat.nama,
-        alokasi: document.getElementById('pinjamAlokasi').value,
-        ket_instalasi: document.getElementById('pinjamKetInstalasi').value,
-        tanggal: document.getElementById('pinjamTanggal').value,
+    const { error: errPinjam } = await supabaseClient.from('peminjaman').insert([{
+        nama_peminjam: nama,
+        status_peminjam: statusPeminjam,
+        keterangan: keterangan,
+        kode_alat: alat.kode,
+        nama_alat: alat.nama,
+        alokasi: alokasi,
+        ket_instalasi: ketInstalasi,
+        tanggal: tanggal,
         status: 'Dipinjam'
     }]);
+    
+    if (errPinjam) return alert("Gagal meminjam: " + errPinjam.message);
 
-    if (error) return alert("Gagal: " + error.message);
     await supabaseClient.from('alat').update({ status: 'Dipinjam' }).eq('id', alatId);
     
     bootstrap.Modal.getInstance(document.getElementById('modalPinjam')).hide();
@@ -157,59 +264,85 @@ document.getElementById('formPinjam').addEventListener('submit', async function(
 });
 
 // ==========================================
-// 7. PENGEMBALIAN & HAPUS
+// 6. LOGIKA PENGEMBALIAN ALAT
 // ==========================================
 function bukaModalKembali(id) {
     document.getElementById('formKembali').reset();
     document.getElementById('kembaliId').value = id;
+    
+    const pinjam = dataPeminjaman.find(p => p.id === id);
+    const alat = dataAlat.find(a => a.nama === pinjam.nama_alat);
+    
+    if (alat) {
+        document.getElementById('kembaliKondisi').value = alat.kondisi || 'Baik';
+    }
+
     new bootstrap.Modal(document.getElementById('modalKembali')).show();
 }
 
 document.getElementById('formKembali').addEventListener('submit', async function(e) {
     e.preventDefault();
     const id = parseInt(document.getElementById('kembaliId').value);
-    const kondisi = document.getElementById('kembaliKondisi').value;
+    const kondisiBaru = document.getElementById('kembaliKondisi').value;
+    const today = new Date().toISOString().split('T')[0];
+    
     const pinjam = dataPeminjaman.find(p => p.id === id);
     
-    await supabaseClient.from('peminjaman').update({
-        status: 'Kembali', tanggal_kembali: new Date().toISOString().split('T')[0], kondisi_kembali: kondisi
+    const { error: errUpdate } = await supabaseClient.from('peminjaman').update({
+        status: 'Kembali',
+        tanggal_kembali: today,
+        kondisi_kembali: kondisiBaru
     }).eq('id', id);
+    
+    if (errUpdate) return alert("Gagal update peminjaman: " + errUpdate.message);
 
-    await supabaseClient.from('alat').update({
-        kondisi: kondisi, status: (kondisi === 'Baik') ? 'Tersedia' : 'Tidak Tersedia'
+    const statusAlatBaru = (kondisiBaru === 'Baik') ? 'Tersedia' : 'Tidak Tersedia';
+    const { error: errAlat } = await supabaseClient.from('alat').update({
+        kondisi: kondisiBaru,
+        status: statusAlatBaru
     }).eq('kode', pinjam.kode_alat);
+    
+    if (errAlat) alert("Gagal update alat: " + errAlat.message);
     
     bootstrap.Modal.getInstance(document.getElementById('modalKembali')).hide();
     refreshData();
 });
 
 async function hapusPeminjaman(id) {
-    if(confirm('Hapus?')) {
+    if(confirm('Hapus riwayat ini?')) {
         await supabaseClient.from('peminjaman').delete().eq('id', id);
         refreshData();
     }
 }
 
 // ==========================================
-// 8. DATA ALAT & EDIT
+// 7. LOGIKA DATA ALAT
 // ==========================================
 function renderAlat() {
     const tbody = document.getElementById('tabelAlat');
+    if (!tbody) return;
     tbody.innerHTML = '';
+    
     dataAlat.forEach((item, index) => {
         let badgeStatus = item.status === 'Tersedia' ? 'bg-success' : 'bg-danger';
-        let badgeKondisi = item.kondisi === 'Rusak' ? 'bg-warning text-dark' : (item.kondisi === 'Hilang' ? 'bg-danger' : 'bg-success');
+        
+        let badgeKondisi = 'bg-success'; 
+        if(item.kondisi === 'Rusak') badgeKondisi = 'bg-warning text-dark';
+        if(item.kondisi === 'Hilang') badgeKondisi = 'bg-danger';
 
         tbody.innerHTML += `
             <tr>
-                <td>${index+1}</td><td>${item.kode}</td><td>${item.nama}</td>
-                <td><span class="badge ${badgeKondisi}">${item.kondisi}</span></td>
+                <td>${index + 1}</td>
+                <td><strong>${item.kode}</strong></td>
+                <td>${item.nama}</td>
+                <td><span class="badge ${badgeKondisi}">${item.kondisi || 'Baik'}</span></td>
                 <td><span class="badge ${badgeStatus}">${item.status}</span></td>
                 <td>
-                    <button class="btn btn-sm btn-warning text-white" onclick="bukaEditAlat(${item.id})"><i class="fas fa-pen"></i></button>
+                    <button class="btn btn-sm btn-warning text-white me-1" onclick="bukaModalEditAlat(${item.id})"><i class="fas fa-pen"></i></button>
                     <button class="btn btn-sm btn-danger" onclick="hapusAlat(${item.id})"><i class="fas fa-trash"></i></button>
                 </td>
-            </tr>`;
+            </tr>
+        `;
     });
 }
 
@@ -220,56 +353,94 @@ function bukaModalAlat() {
 
 document.getElementById('formAlat').addEventListener('submit', async function(e) {
     e.preventDefault();
+    const kode = document.getElementById('alatKode').value;
+    const nama = document.getElementById('alatNama').value;
+    const kondisi = document.getElementById('alatKondisi').value;
+    
     const { error } = await supabaseClient.from('alat').insert([{
-        kode: document.getElementById('alatKode').value,
-        nama: document.getElementById('alatNama').value,
-        kondisi: document.getElementById('alatKondisi').value,
-        status: 'Tersedia'
+        kode: kode, nama: nama, kondisi: kondisi, status: 'Tersedia'
     }]);
-    if (!error) {
+    
+    if (error) alert("Gagal menambah alat: " + error.message);
+    else {
         bootstrap.Modal.getInstance(document.getElementById('modalAlat')).hide();
         refreshData();
-    } else alert(error.message);
+    }
 });
 
-function bukaEditAlat(id) {
+function bukaModalEditAlat(id) {
     const alat = dataAlat.find(a => a.id === id);
-    document.getElementById('editAlatId').value = alat.id;
-    document.getElementById('editAlatKode').value = alat.kode;
-    document.getElementById('editAlatNama').value = alat.nama;
-    document.getElementById('editAlatKondisi').value = alat.kondisi;
-    document.getElementById('editAlatStatus').value = alat.status;
-    new bootstrap.Modal(document.getElementById('modalEditAlat')).show();
+    if(alat) {
+        document.getElementById('editAlatId').value = alat.id;
+        document.getElementById('editAlatKode').value = alat.kode;
+        document.getElementById('editAlatNama').value = alat.nama;
+        document.getElementById('editAlatKondisi').value = alat.kondisi;
+        document.getElementById('editAlatStatus').value = alat.status;
+        new bootstrap.Modal(document.getElementById('modalEditAlat')).show();
+    }
 }
 
 document.getElementById('formEditAlat').addEventListener('submit', async function(e) {
     e.preventDefault();
-    const id = document.getElementById('editAlatId').value;
-    await supabaseClient.from('alat').update({
-        nama: document.getElementById('editAlatNama').value,
-        kondisi: document.getElementById('editAlatKondisi').value,
-        status: document.getElementById('editAlatStatus').value
+    const id = parseInt(document.getElementById('editAlatId').value);
+    const namaBaru = document.getElementById('editAlatNama').value;
+    const kondisiBaru = document.getElementById('editAlatKondisi').value;
+    const statusBaru = document.getElementById('editAlatStatus').value;
+    
+    const { error } = await supabaseClient.from('alat').update({
+        nama: namaBaru, kondisi: kondisiBaru, status: statusBaru
     }).eq('id', id);
-    bootstrap.Modal.getInstance(document.getElementById('modalEditAlat')).hide();
-    refreshData();
+    
+    if (error) alert("Gagal update alat: " + error.message);
+    else {
+        bootstrap.Modal.getInstance(document.getElementById('modalEditAlat')).hide();
+        refreshData();
+    }
 });
 
 async function hapusAlat(id) {
-    if(confirm('Hapus alat?')) {
+    if(confirm('Hapus alat ini?')) {
         await supabaseClient.from('alat').delete().eq('id', id);
         refreshData();
     }
 }
 
 // ==========================================
-// 9. LAPORAN (DOWNLOAD EXCEL)
+// 8. FUNGSI DOWNLOAD EXCEL (LAPORAN)
 // ==========================================
 function downloadExcel() {
-    if (dataPeminjaman.length === 0) return alert("Tidak ada data!");
-    let csv = "No;Nama;Status;Alokasi;Ket Instalasi;Alat;Tgl Pinjam;Tgl Kembali;Kondisi;Status\n";
-    dataPeminjaman.forEach((item, i) => {
-        let nama = (item.nama_peminjam||'').replace(/;/g,' ');
-        let ketI = (item.ket_instalasi||'').replace(/;/g,' ');
-        csv += `${i+1};${nama};${item.status_peminjam};${item.alokasi};${ketI};${item.nama_alat};${item.tanggal};${item.tanggal_kembali||'-'};${item.kondisi_kembali||'-'};${item.status}\n`;
+    if (dataPeminjaman.length === 0) {
+        alert("Belum ada data untuk diunduh!");
+        return;
+    }
+
+    // Header CSV
+    let csvContent = "No,Nama Peminjam,Status Peminjam,Alokasi,Ket Instalasi,Kode Alat,Nama Alat,Tgl Pinjam,Tgl Kembali,Kondisi Kembali,Status\n";
+
+    // Isi Data
+    dataPeminjaman.forEach((item, index) => {
+        let nama = item.nama_peminjam.replace(/,/g, ' ');
+        let ket = (item.keterangan || '').replace(/,/g, ' ');
+        let ketInstalasi = (item.ket_instalasi || '').replace(/,/g, ' ');
+        
+        csvContent += `${index + 1},${nama},${item.status_peminjam},${item.alokasi || '-'},${ketInstalasi},${item.kode_alat},${item.nama_alat},${item.tanggal},${item.tanggal_kembali || '-'},${item.kondisi_kembali || '-'},${item.status}\n`;
     });
-    const blob = new Blob(["\u
+
+    // Membuat file dan memicu download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Laporan_Peminjaman_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// ==========================================
+// 9. INITIALIZATION
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    refreshData(); 
+});
